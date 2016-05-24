@@ -15,8 +15,8 @@ the required packages:
     brew install homebrew/science/hypre
     brew install homebrew/science/petsc
 
-**Note**: Advanced users may build their own versions of PETSc and MPI, `gflow` does not require
-any specific preconditioner (we recommend `hypre`) or does it depend on a particular
+**Note**: Advanced users may build their own versions of PETSc and an MPI library, `gflow` does not require
+any specific preconditioner (we recommend `hypre`) nor does it depend on a particular
 MPI implementation
 
 With the required packages installed, `gflow` can be built by running the following command:
@@ -38,3 +38,6 @@ directory.
 ### Window
 
 *Not happening*...
+
+
+## Running
