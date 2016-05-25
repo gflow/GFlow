@@ -17,7 +17,7 @@ the required packages:
 
 **Note**: Advanced users may build their own versions of PETSc and an MPI library, `gflow` does not require
 any specific preconditioner (we recommend `hypre`) nor does it depend on a particular
-MPI implementation
+MPI implementation.
 
 With the required packages installed, `gflow` can be built by running the following command:
 
