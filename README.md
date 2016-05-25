@@ -35,7 +35,7 @@ directory.
 *Coming soon*...
 
 
-### Window
+### Windows
 
 *Not happening*...
 
