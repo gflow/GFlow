@@ -156,7 +156,7 @@ static void update_matrix(struct ResistanceGrid *R, struct ConductanceGrid *G,
       if((a&b) != 0) /*a != 0 && b != 0)*/
          value *= M_SQRT1_2;
       if(isinf(value)) {
-         message("Infinite value found. R[%zu][%zu] = %lf; R[%zu][%zu] = %lf\n", i, j, val1, i+a, j+b, val2);
+         message("Infinite value found. R[%zu][%zu] = %lf; R[%llu][%llu] = %lf\n", i, j, val1, i+a, j+b, val2);
       }
       G_add_value(G, id1, id2, -value);
       G_add_value(G, id2, id1, -value);
