@@ -334,6 +334,17 @@ static void show_eta(double start_time, size_t pos, size_t total)
    message("Estimated time remaining: %02ld:%02ld:%02ld\n", hours, minutes, seconds);
 }
 
+static int killswitch()
+{
+   /* First check the working directory */
+   if(file_exists("killswitch")) {
+      unlink("killswitch");
+      return 1;
+   }
+
+   return 0;
+}
+
 static void manager()
 {
    int i, j, index;
@@ -413,6 +424,11 @@ static void manager()
       write_effective_resistance(voltages, pp->pairs[index].p1.index, nodes[0],
                                            pp->pairs[index].p2.index, nodes[1]);
       show_eta(start_time, i, nps.count);
+
+      if(killswitch()) {
+         message("Killswitch engaged.\n");
+         break;
+      }
    }
    /* send the termination singal to the wokers */
    MPI_Bcast(terminate, 2, MPI_INT, 0, MPI_COMM_WORLD);
