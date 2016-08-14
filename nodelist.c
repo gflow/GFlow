@@ -17,12 +17,14 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <ctype.h>
 #include <math.h>
 #include <mpi.h>
 #include <petsc.h>
 
 #include "util.h"
 #include "nodelist.h"
+#include "habitat.h"
 
 char       node_file[PATH_MAX] = { 0 };
 char       node_pair_file[PATH_MAX] = { 0 };
@@ -90,13 +92,18 @@ int validate_points(struct Point *points, size_t npoints, struct ResistanceGrid 
    return result;
 }
 
-struct Point *parse_node_list(char *filename, size_t *npoints)
+int peek(FILE *f)
+{
+   int c = fgetc(f);
+   ungetc(c, f);
+   return c;
+}
+
+static struct Point *node_list_is_pairs(FILE *f, size_t *npoints)
 {
    struct Point *points = NULL;
    size_t nmax = 32;
-   FILE *f = fopen(filename, "r");
 
-   *npoints = -1;
    points = (struct Point *)malloc(nmax * sizeof(struct Point));
    while(!feof(f)) {
 
@@ -111,6 +118,54 @@ struct Point *parse_node_list(char *filename, size_t *npoints)
       --points[*npoints].x;
       --points[*npoints].y;
    }
+   return points;
+}
+
+static struct Point *node_list_is_asc(char *filename, size_t *npoints)
+{
+   struct ResistanceGrid R;
+   struct Point *points = NULL;
+   size_t nmax = 32;
+   unsigned i, j;
+
+   /* We should generalize the ASCII Grid reader */
+   parse_habitat_file(&R, filename);
+   points = (struct Point *)malloc(nmax * sizeof(struct Point));
+   for(i = 0; i < R.nrows; i++) {
+      for(j = 0; j < R.ncols; j++) {
+         int k = R.cells[i][j].index;
+         if(k > -1) {
+            if(k >= nmax) {
+               nmax *= 2;
+               points = (struct Point *)realloc(points, nmax * sizeof(struct Point));
+            }
+            points[k].index = k;
+            points[k].x = i;
+            points[k].y = j;
+         }
+      }
+   }
+   *npoints = R.cell_count;
+
+   free_habitat(&R);
+   return points;
+}
+
+struct Point *parse_node_list(char *filename, size_t *npoints)
+{
+   struct Point *points = NULL;
+   FILE *f = fopen(filename, "r");
+
+   *npoints = -1;
+
+   /* This is a terrible approach if we ever want to support multiple formats.  Until
+    * then, if the first character is a letter then assume it's an ASCII Grid file
+    */
+   if(isalpha(peek(f))) {
+      points = node_list_is_asc(filename, npoints);
+   }
+   else
+      points = node_list_is_pairs(f, npoints);
    fclose(f);
    message("%zu points in %s\n", *npoints, filename);
 
