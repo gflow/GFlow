@@ -1,5 +1,5 @@
 # GFlow
-Software for modeling circuit theory-based connectivity at any scale. We developed GFflow to answer large ecological problems using large compute resources. If solving a small problem or if you are willing to sacrifice some performance, it can be deployed on a desktop computer.
+Software for modeling circuit theory-based connectivity at any scale. We developed GFflow to solve large ecological problems in a High Performance Computing environment. If solving a small problem or if you are willing to sacrifice some performance, it can be deployed on a desktop computer.
 
 ## Installation
 
