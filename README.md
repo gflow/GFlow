@@ -1,5 +1,5 @@
 # GFlow
-Software for modeling circuit theory-based connectivity
+Software for modeling circuit theory-based connectivity at any scale. We developed GFflow to answer large ecological problems using large compute resources. If solving a small problem or if you are willing to sacrifice some performance, it can be deployed on a desktop computer.
 
 ## Installation
 
@@ -50,12 +50,14 @@ directory.
 1. Navigate to the directory where you downloaded GFlow. 
 
 2. Extract the zipped example input resistance file (`resistance.asc.gz`) into the current directory. *E.g., using terminal:*
-
-	gunzip resistance.asc.gz
-
+```
+    gunzip resistance.asc.gz
+```
 3. Open the commented example `execute_example.sh` script with your favorite text editor and examine the format, default settings, and save any necessary 
 adjustments. Otherwise, script is ready to submit and solve the example problem.
 
 4. Open terminal if not already and navigate to GFlow directory. Execute script:
+```
+    sh execute_example.sh
+```
 
-	sh execute_example.sh
