@@ -5,8 +5,9 @@ Software for modeling circuit theory-based connectivity at any scale. We develop
 
 ## Installation
 
-### Mac OS X
+### [Please download latest release with sample data.] (https://github.com/Pbleonard/GFlow/releases/latest)
 
+### Mac OS X
 The easiest way to setup your environment is with the
 [Homebrew](http://brew.sh) package manager.
 After Homebrew is set up, run the following commands to install
