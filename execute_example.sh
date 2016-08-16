@@ -3,7 +3,7 @@
 # This script will execute Gflow with 5 random pairwise computations using 4 cpus on Mac OSX and output only the current density summation. 
 # The default inputs include 588 node pairs that solve > 34.25 million unknowns. 
 # Gflow must be compiled locally before executing this script. Dependencies for Gflow include: openmpi, hypre, and petsc. If you would like to execute a random shuffle
-# of all pairwise, please see installation instructions for 'coreutils'
+# of all pairwise, please install 'coreutils'as well.
 
 # Example flags are commented below to demonstrate example execution of GFlow
 
@@ -16,7 +16,7 @@ export LD_LIBRARY_PATH=${PETSC_DIR}/lib:$LD_LIBRARY_PATH
 # Set Output Directory: Default is Current Directory
 OUTPUT_DIR=.
 
-# Set number of random pairs to calculate. Currently n = 5 (If you are on a notebook or older computer, you may want to lower the number or use smaller example data). 
+# Set number of random pairs to calculate from all possible pairs. Currently n = 5 (If you are on a notebook or older computer, you may want to lower the number or use a smaller resistance file). 
 # Remove or comment line for all pairwise. Random pairs chosen are directed to 'shuf.tsv'. Requires 'coreutils'
 gshuf all.tsv -n 5 > ${OUTPUT_DIR}/shuf.tsv 
 # Set the Clock
@@ -26,8 +26,8 @@ date
 	# -Set Prefix for output files: Currently = 'local_'
 	# -Set Output Directory: Set to default above
 	# -Set Habitat Map or resistance surface (.asc)
-	# -Set Focal Nodes or Source/Destination Points (.txt list that corresponds to resistance surface or .asc grid)
-	# -Calculate the random node pairs generated above if desired. Otherwise comment or remove line for all pairwise.
+	# -Set Focal Nodes or Source/Destination Points (.txt list of point pairs to calculate or .asc grid)
+	# -Calculate only desired node pairs (randomly created above in this case). Otherwise comment out or remove line for all pairwise.
 	# -Set output format -- .asc or amps. Default = .asc
 	# -Select output options. 1 = Only summation; 0 = Pairwise calculations + Summation
 mpiexec -n 4 ./gflow.x 
