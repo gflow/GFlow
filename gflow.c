@@ -33,6 +33,8 @@
 
 #define MPI_SIZE_T MPI_UINT64_T
 
+static PetscReal converge_at = 0.;
+
 static char common_options[] =
    "-ksp_type cg "
 /*   "-ksp_monitor_true_residual " */
@@ -66,6 +68,7 @@ struct NodePairSequence
 static void parse_args()
 {
    const char *output_formats[3] = {  "asc", "asc.gz", "amp" };
+   char convergence[PATH_MAX] = { 0 };
    
    PetscBool flg;
    PetscOptionsGetString(PETSC_NULL, "-habitat",          habitat_file,     PATH_MAX, &flg);
@@ -80,6 +83,7 @@ static void parse_args()
    PetscOptionsGetBool(PETSC_NULL,   "-nearest_first",   &nearest_first,              &flg);
    PetscOptionsGetBool(PETSC_NULL,   "-furthest_first",  &furthest_first,             &flg);
    PetscOptionsGetBool(PETSC_NULL,   "-shuffle_node_pairs",  &shuffle_node_pairs,             &flg);
+   PetscOptionsGetString(PETSC_NULL, "-converge_at",      convergence, PATH_MAX, &flg);
    PetscOptionsGetEList(PETSC_NULL,  "-output_format",
                                      output_formats, 3,  &output_format,              &flg); 
 
@@ -91,6 +95,12 @@ static void parse_args()
    if(strlen(node_pair_file) > 0 && !file_exists(node_pair_file)) {
       message("%s does not exists\n", node_pair_file);
       MPI_Abort(MPI_COMM_WORLD, 1);
+   }
+   if(strlen(convergence) > 0) {
+      char *p;
+      converge_at = strtod(convergence, &p);
+      if(p[0] == 'N')
+         converge_at = pow(10., -converge_at);
    }
    read_complete_solution();  /* TODO: Need to remove this feature */
 }
@@ -387,6 +397,7 @@ static void manager()
    start_time = microtime();
    voltages = NULL;
    for(i = 0; i < nps.count; i++) {
+      double pcoeff = 1;
       index = nps.seq[i];
       int nodes[2]  = { R.cells[pp->pairs[index].p1.x][pp->pairs[index].p1.y].index
                       , R.cells[pp->pairs[index].p2.x][pp->pairs[index].p2.y].index };
@@ -408,7 +419,7 @@ static void manager()
       MPI_Bcast(nodes, 2, MPI_INT, 0, MPI_COMM_WORLD);
       if(voltages != NULL) {
          /* if we have a previous result, save to file (all but first pass through loop) */
-         write_result(&R, &G, index-1, voltages);
+         pcoeff = write_result(&R, &G, index-1, voltages);
 //         if(index % 100 == 0)
 //            write_total_current(&R, &G, index);
       }
@@ -425,6 +436,10 @@ static void manager()
                                            pp->pairs[index].p2.index, nodes[1]);
       show_eta(start_time, i, nps.count);
 
+      if(pcoeff < converge_at) {
+         message("%lf < %lf; converged.\n", pcoeff, converge_at);
+         break;
+      }
       if(killswitch()) {
          message("Killswitch engaged.\n");
          break;

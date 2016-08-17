@@ -35,10 +35,10 @@ extern double    output_threshold;
 extern PetscBool output_final_current_only;
 extern PetscBool use_mpiio;
 
-void write_result(struct ResistanceGrid *R,
-                  struct ConductanceGrid *G,
-                  int index,
-                  double *voltages);
+double write_result(struct ResistanceGrid *R,
+                    struct ConductanceGrid *G,
+                    int index,
+                    double *voltages);
 
 void write_total_current(struct ResistanceGrid *R,
                          struct ConductanceGrid *G,

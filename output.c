@@ -55,10 +55,10 @@ static double sum_sqr(size_t n, float *x, float *w);
 static double rsme(size_t n, float *x, float *w);
 static int    nines(double x);
 
-void write_result(struct ResistanceGrid *R,
-                  struct ConductanceGrid *G,
-                  int index,
-                  double *voltages)
+double write_result(struct ResistanceGrid *R,
+                    struct ConductanceGrid *G,
+                    int index,
+                    double *voltages)
 {
    float *current, *prev_total;
    double pcoeff;
@@ -101,7 +101,9 @@ void write_result(struct ResistanceGrid *R,
       }
       PetscFree(current);
       PetscFree(prev_total);
+      return pcoeff;
    }
+   return 1;  /* need to return something so we don't converge early */
 }
 
 void write_total_current(struct ResistanceGrid *R,
