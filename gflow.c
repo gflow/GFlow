@@ -71,22 +71,24 @@ static void parse_args()
    char convergence[PATH_MAX] = { 0 };
    
    PetscBool flg;
-   PetscOptionsGetString(PETSC_NULL, "-habitat",          habitat_file,     PATH_MAX, &flg);
-   PetscOptionsGetString(PETSC_NULL, "-nodes",            node_file,        PATH_MAX, &flg);
-   PetscOptionsGetString(PETSC_NULL, "-node_pairs",       node_pair_file,   PATH_MAX, &flg);
-   PetscOptionsGetString(PETSC_NULL, "-output_directory", output_directory, PATH_MAX, &flg);
-   PetscOptionsGetString(PETSC_NULL, "-output_prefix",    output_prefix,    PATH_MAX, &flg);
-   PetscOptionsGetReal(PETSC_NULL,   "-output_threshold",&output_threshold,           &flg);
-   PetscOptionsGetBool(PETSC_NULL,   "-use_mpi_io",      &use_mpiio,                  &flg);
-   PetscOptionsGetBool(PETSC_NULL,   "-output_final_current_only",      &output_final_current_only, &flg);
-   PetscOptionsGetReal(PETSC_NULL,   "-max_distance",    &max_distance,               &flg);
-   PetscOptionsGetBool(PETSC_NULL,   "-nearest_first",   &nearest_first,              &flg);
-   PetscOptionsGetBool(PETSC_NULL,   "-furthest_first",  &furthest_first,             &flg);
-   PetscOptionsGetBool(PETSC_NULL,   "-shuffle_node_pairs",  &shuffle_node_pairs,             &flg);
-   PetscOptionsGetString(PETSC_NULL, "-converge_at",      convergence, PATH_MAX, &flg);
-   PetscOptionsGetEList(PETSC_NULL,  "-output_format",
+   PetscOptionsGetString(PETSC_NULL, NULL, "-habitat",          habitat_file,     PATH_MAX, &flg);
+   PetscOptionsGetString(PETSC_NULL, NULL, "-nodes",            node_file,        PATH_MAX, &flg);
+   PetscOptionsGetString(PETSC_NULL, NULL, "-node_pairs",       node_pair_file,   PATH_MAX, &flg);
+   PetscOptionsGetString(PETSC_NULL, NULL, "-output_directory", output_directory, PATH_MAX, &flg);
+   PetscOptionsGetString(PETSC_NULL, NULL, "-output_prefix",    output_prefix,    PATH_MAX, &flg);
+   PetscOptionsGetReal(PETSC_NULL,   NULL, "-output_threshold",&output_threshold,           &flg);
+   PetscOptionsGetBool(PETSC_NULL,   NULL, "-use_mpi_io",      &use_mpiio,                  &flg);
+   PetscOptionsGetBool(PETSC_NULL,   NULL, "-output_final_current_only",      &output_final_current_only, &flg);
+   PetscOptionsGetReal(PETSC_NULL,   NULL, "-max_distance",    &max_distance,               &flg);
+   PetscOptionsGetBool(PETSC_NULL,   NULL, "-nearest_first",   &nearest_first,              &flg);
+   PetscOptionsGetBool(PETSC_NULL,   NULL, "-furthest_first",  &furthest_first,             &flg);
+   PetscOptionsGetInt(PETSC_NULL,   NULL, "-shuffle_node_pairs",  &shuffle_node_pairs,             &flg);
+message("shuf = %d, flg = %d\n", shuffle_node_pairs, flg);
+   PetscOptionsGetString(PETSC_NULL, NULL, "-converge_at",      convergence, PATH_MAX, &flg);
+   PetscOptionsGetEList(PETSC_NULL,  NULL, "-output_format",
                                      output_formats, 3,  &output_format,              &flg); 
 
+MPI_Abort(MPI_COMM_WORLD, 1);
    if(!file_exists(output_directory)) {
       message("Directory `%s` does not exist. Defaulting to current working directory.\n", output_directory);
       output_directory[0] = '.';
@@ -111,7 +113,7 @@ static void init_node_pair_sequence(struct NodePairSequence *nps, struct PointPa
    int i;
    nps->count = (1<<20) /* pp->count */;
    PetscMalloc(sizeof(int) * nps->count, &nps->seq);
-   PetscOptionsGetIntArray(PETSC_NULL, "-range", nps->seq, &nps->count, &flg);
+   PetscOptionsGetIntArray(PETSC_NULL, NULL, "-range", nps->seq, &nps->count, &flg);
    if(!flg) {
       nps->count = pp->count;
       for(i = 0; i < nps->count; i++)
@@ -486,7 +488,7 @@ int main(int argc, char *argv[])
    int rank;
 
    PetscInitialize(&argc, &argv, NULL, NULL);
-   PetscOptionsInsertString(common_options);
+   PetscOptionsInsertString(NULL, common_options);
    MPI_Comm_rank(PETSC_COMM_WORLD, &rank);
 
    init_communicator();

@@ -315,7 +315,7 @@ void read_complete_solution()
    gzFile f;
    int count;
 
-   PetscOptionsGetString(PETSC_NULL, "-complete_solution", solfile, PATH_MAX, &flg);
+   PetscOptionsGetString(PETSC_NULL, NULL, "-complete_solution", solfile, PATH_MAX, &flg);
    if(flg) {
       message("Reading complete solution from %s\n", solfile);
       f = gzopen(solfile, "r");

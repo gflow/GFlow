@@ -17,6 +17,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <limits.h>
 #include <ctype.h>
 #include <time.h>
 #include <math.h>
@@ -31,7 +32,7 @@ char       node_file[PATH_MAX] = { 0 };
 char       node_pair_file[PATH_MAX] = { 0 };
 PetscBool  nearest_first = PETSC_FALSE;
 PetscBool  furthest_first = PETSC_FALSE;
-PetscBool  shuffle_node_pairs = PETSC_FALSE;
+PetscInt  shuffle_node_pairs = -1;
 PetscReal  max_distance = 40e6;  /* circumference of the earth (approx) */
 PetscBool  resistance_only = PETSC_FALSE;
 
