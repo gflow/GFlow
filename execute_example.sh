@@ -30,7 +30,7 @@ date
 	# -Calculate only desired node pairs (randomly created above in this case). Otherwise comment out or remove line for all pairwise.
 	# -Set output format -- .asc or amps. Default = .asc
 	# -Select output options. 1 = Only summation; 0 = Pairwise calculations + Summation
-mpiexec -n 4 ./gflow.x 
+mpiexec -n 4 ./gflow.x \
 	-output_prefix local_ \
 	-output_directory ${OUTPUT_DIR} \
 	-habitat resistance.asc \
