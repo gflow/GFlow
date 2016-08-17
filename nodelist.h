@@ -25,6 +25,7 @@ extern char       node_file[PATH_MAX];
 extern char       node_pair_file[PATH_MAX];
 extern PetscBool  nearest_first;
 extern PetscBool  furthest_first;
+extern PetscBool  shuffle_node_pairs;
 extern PetscReal  max_distance;
 
 struct Point

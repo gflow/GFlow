@@ -79,6 +79,7 @@ static void parse_args()
    PetscOptionsGetReal(PETSC_NULL,   "-max_distance",    &max_distance,               &flg);
    PetscOptionsGetBool(PETSC_NULL,   "-nearest_first",   &nearest_first,              &flg);
    PetscOptionsGetBool(PETSC_NULL,   "-furthest_first",  &furthest_first,             &flg);
+   PetscOptionsGetBool(PETSC_NULL,   "-shuffle_node_pairs",  &shuffle_node_pairs,             &flg);
    PetscOptionsGetEList(PETSC_NULL,  "-output_format",
                                      output_formats, 3,  &output_format,              &flg); 
 
@@ -402,7 +403,6 @@ static void manager()
               pp->pairs[index].p1.index+1, pp->pairs[index].p1.x, pp->pairs[index].p1.y,
               pp->pairs[index].p2.index+1, pp->pairs[index].p2.x, pp->pairs[index].p2.y,
               dist(pp->pairs[index].p1, pp->pairs[index].p2) * R.cellsize * 1e-3);
-
 
       /* inform the worker nodes of the source and destination nodes */
       MPI_Bcast(nodes, 2, MPI_INT, 0, MPI_COMM_WORLD);

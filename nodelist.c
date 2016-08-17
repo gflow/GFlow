@@ -18,6 +18,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <time.h>
 #include <math.h>
 #include <mpi.h>
 #include <petsc.h>
@@ -30,6 +31,7 @@ char       node_file[PATH_MAX] = { 0 };
 char       node_pair_file[PATH_MAX] = { 0 };
 PetscBool  nearest_first = PETSC_FALSE;
 PetscBool  furthest_first = PETSC_FALSE;
+PetscBool  shuffle_node_pairs = PETSC_FALSE;
 PetscReal  max_distance = 40e6;  /* circumference of the earth (approx) */
 PetscBool  resistance_only = PETSC_FALSE;
 
@@ -39,6 +41,7 @@ static struct PointPairs *generate_pairs(struct Point *points, size_t npoints, d
 static struct PointPairs *parse_node_pair_file(struct Point *points, size_t npoints, double max_pixel_distance);
 static void sort_pairs_close(struct PointPairs *pairs);
 static void sort_pairs_far(struct PointPairs *pairs);
+static void shuffle_pairs(struct PointPairs *pairs);
 
 struct PointPairs *init_point_pairs(struct ResistanceGrid *R)
 {
@@ -65,6 +68,8 @@ struct PointPairs *init_point_pairs(struct ResistanceGrid *R)
       sort_pairs_close(pp);
    else if(furthest_first)
       sort_pairs_far(pp);
+   else if(shuffle_node_pairs)
+      shuffle_pairs(pp);
 
    return pp;
 }
@@ -278,3 +283,20 @@ void sort_pairs_far(struct PointPairs *pp)
    qsort(pp->pairs, pp->count, sizeof(struct Pair), cmp_pair_far);
 }
 
+// http://stackoverflow.com/a/6127606/7536
+void shuffle_pairs(struct PointPairs *pp)
+{
+   size_t i;
+   if(pp->count > RAND_MAX) {
+      message("shuffle_pairs cannot handle more than %d pairs", RAND_MAX);
+      return;
+   }
+
+   srand(time(0));  /* TODO: Should the random seed be a user provided value? */
+   for (i = 0; i < pp->count - 1; i++) {
+      size_t j = i + rand() / (RAND_MAX / (pp->count - i) + 1);
+      struct Pair t = pp->pairs[j];
+      pp->pairs[j] = pp->pairs[i];
+      pp->pairs[i] = t;
+   }
+}
