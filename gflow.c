@@ -83,12 +83,10 @@ static void parse_args()
    PetscOptionsGetBool(PETSC_NULL,   NULL, "-nearest_first",   &nearest_first,              &flg);
    PetscOptionsGetBool(PETSC_NULL,   NULL, "-furthest_first",  &furthest_first,             &flg);
    PetscOptionsGetInt(PETSC_NULL,   NULL, "-shuffle_node_pairs",  &shuffle_node_pairs,             &flg);
-message("shuf = %d, flg = %d\n", shuffle_node_pairs, flg);
    PetscOptionsGetString(PETSC_NULL, NULL, "-converge_at",      convergence, PATH_MAX, &flg);
    PetscOptionsGetEList(PETSC_NULL,  NULL, "-output_format",
                                      output_formats, 3,  &output_format,              &flg); 
 
-MPI_Abort(MPI_COMM_WORLD, 1);
    if(!file_exists(output_directory)) {
       message("Directory `%s` does not exist. Defaulting to current working directory.\n", output_directory);
       output_directory[0] = '.';
