@@ -28,6 +28,8 @@ date
 	# -Set Habitat Map or resistance surface (.asc)
 	# -Set Focal Nodes or Source/Destination Points (.txt list of point pairs to calculate or .asc grid)
 	# -Calculate only desired node pairs (randomly created above in this case). Otherwise comment out or remove line for all pairwise.
+	# -Set convergence factor (accepts the following examples, 4N, .00001, 1e4 )
+	# -Shuffles pairs for random selection. Input is binary. Default = 1 (yes)
 	# -Set output format -- .asc or amps. Default = .asc
 	# -Select output options. 1 = Only summation; 0 = Pairwise calculations + Summation
 mpiexec -n 4 ./gflow.x \
@@ -36,6 +38,8 @@ mpiexec -n 4 ./gflow.x \
 	-habitat resistance.asc \
 	-nodes nodes \
 	-node_pairs ${OUTPUT_DIR}/shuf.tsv \
+	#-converge_at 4N \
+	#-shuffle_node_pairs 1 \
 	-output_format asc \
 	-output_final_current_only 1
  
