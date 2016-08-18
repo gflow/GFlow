@@ -92,6 +92,10 @@ static void parse_args()
       output_directory[0] = '.';
       output_directory[1] = 0;
    }
+   if(strlen(node_file) > 0 && !file_exists(node_file)) {
+      message("%s does not exists\n", node_file);
+      MPI_Abort(MPI_COMM_WORLD, 1);
+   }
    if(strlen(node_pair_file) > 0 && !file_exists(node_pair_file)) {
       message("%s does not exists\n", node_pair_file);
       MPI_Abort(MPI_COMM_WORLD, 1);
