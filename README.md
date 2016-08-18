@@ -52,9 +52,9 @@ directory.
 
 1. Navigate to the directory where you downloaded GFlow. 
 
-2. Extract the zipped example resistance file (`resistance.asc.gz`) into the current directory. *E.g., using terminal:*
+2. Extract the zipped example input files (`inputs.tar.gz`) into the current directory. *E.g., using terminal:*
 ```
-    gunzip resistance.asc.gz
+    gunzip -c inputs.tar.gz | tar xopf -
 ```
 3. Open the commented example `execute_example.sh` script with your favorite text editor and examine the format, default settings, and save any necessary 
 adjustments. Otherwise, the script is ready to submit and solve the example problem.
