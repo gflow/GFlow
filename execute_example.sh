@@ -10,7 +10,7 @@
 which mpiexec
 
 # Set and add PETSc to PATH
-export PETSC_DIR=/usr/local/Cellar/petsc/3.6.3_4/real
+export PETSC_DIR=/usr/local/Cellar/petsc/3.7.3/real
 export LD_LIBRARY_PATH=${PETSC_DIR}/lib:$LD_LIBRARY_PATH
 
 # Set Output Directory: Default is Current Directory
