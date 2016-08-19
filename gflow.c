@@ -33,7 +33,7 @@
 
 #define MPI_SIZE_T MPI_UINT64_T
 
-static PetscReal converge_at = 0.;
+static PetscReal converge_at = 1.;
 
 static char common_options[] =
    "-ksp_type cg "
@@ -104,7 +104,12 @@ static void parse_args()
       char *p;
       converge_at = strtod(convergence, &p);
       if(p[0] == 'N')
-         converge_at = pow(10., -converge_at);
+         converge_at = 1. - pow(10., -converge_at);
+      if(converge_at < 0. || converge_at > 1.) {
+         message("Error.  Convergence factors must be between 0 and 1.\n");
+         MPI_Abort(MPI_COMM_WORLD, 1);
+      }
+      message("Simulation will converge at %lg\n", converge_at);
    }
    read_complete_solution();  /* TODO: Need to remove this feature */
 }
@@ -440,8 +445,8 @@ static void manager()
                                            pp->pairs[index].p2.index, nodes[1]);
       show_eta(start_time, i, nps.count);
 
-      if(pcoeff < converge_at) {
-         message("%lf < %lf; converged.\n", pcoeff, converge_at);
+      if(pcoeff > converge_at) {
+         message("%lf > %lf; converged.\n", pcoeff, converge_at);
          break;
       }
       if(killswitch()) {

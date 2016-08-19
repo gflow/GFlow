@@ -29,7 +29,7 @@ date
 	# -Set Habitat Map or resistance surface (.asc)
 	# -Set Focal Nodes or Source/Destination Points (.txt list of point pairs to calculate or .asc grid)
 	# -Calculate only desired node pairs if input. Currently set to 5 random suffles above.
-	# -Set convergence factor (accepts the following example formats, 4N, .0001, 1e-4 ). Currently not set.
+	# -Set convergence factor (accepts the following example formats, 4N or 0.9999 ). Currently not set.
 	# -Shuffles pairs for random selection. Input is binary. Currently = 0; using 5 random shuffles above.
 	# -Set output format -- .asc or amps. Default = .asc
 	# -Select output options. 1 = Only summation; 0 = Pairwise calculations + Summation
