@@ -40,7 +40,7 @@ mpiexec -n 4 ./gflow.x \
 	-habitat resistance.asc \
 	-nodes nodes \
 	-node_pairs ${OUTPUT_DIR}/shuf.tsv \
-	-converge_at \
+	-converge_at 2N \
 	-shuffle_node_pairs 0\
 	-output_format asc \
 	-output_final_current_only 1
