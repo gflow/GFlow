@@ -54,7 +54,7 @@ directory.
 
 2. Extract the zipped example input files (`inputs.tar.gz`) into the current directory. *E.g., using terminal:*
 ```
-    gunzip -c inputs.tar.gz | tar xopf -
+    tar xvf inputs.tar.gz
 ```
 3. Open the commented example `execute_example.sh` script with your favorite text editor and examine the format, default settings, and save any necessary 
 adjustments. Otherwise, the script is ready to submit and solve the example problem.
