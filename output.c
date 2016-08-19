@@ -285,7 +285,7 @@ double pearson_coefficient(size_t n, float *x, float *y)
       Sx2 += x[i] * x[i];
       Sy2 += y[i] * y[i];
    }
-   return (Sy2 > 0) ? (n * Sxy - Sx*Sy) / (sqrt(n * Sx2 - Sx*Sx) * sqrt(n * Sy2 - Sy*Sy)) : 0.;
+   return (Sy2 > 0) ? (n * Sxy - Sx*Sy) / (sqrt(n * Sx2 - Sx*Sx) * sqrt(n * Sy2 - Sy*Sy)) : 1.;
 }
 
 double sum_sqr(size_t n, float *x, float *y)
