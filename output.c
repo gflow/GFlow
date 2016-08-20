@@ -31,6 +31,7 @@
 char      output_directory[PATH_MAX] = ".";
 char      output_prefix[PATH_MAX] = "I";
 int       output_format = OUTPUT_FORMAT_ASC;
+char      reff_path[PATH_MAX] = "";
 double    output_threshold = 1e-9;
 PetscBool output_final_current_only = PETSC_FALSE;
 PetscBool use_mpiio = PETSC_FALSE;
@@ -103,7 +104,7 @@ double write_result(struct ResistanceGrid *R,
       PetscFree(prev_total);
       return pcoeff;
    }
-   return 1;  /* need to return something so we don't converge early */
+   return 0;
 }
 
 void write_total_current(struct ResistanceGrid *R,
@@ -242,6 +243,11 @@ void write_effective_resistance(double *voltages, int srcindex,  int srcnode,
 {
    // V = IR;  I = 1A;  R = \delta{}V
    message("R_eff = %d,%d,%lf\n", srcindex+1, destindex+1, voltages[srcnode] - voltages[destnode]);
+   if(strlen(reff_path) > 0) {
+      FILE *f = fopen(reff_path, "a");
+      fprintf(f, "%d,%d,%lf\n", srcindex+1, destindex+1, voltages[srcnode] - voltages[destnode]);
+      fclose(f);
+   }
 }
 
 float *calculate_current(struct ConductanceGrid *G, double *voltages)

@@ -77,6 +77,7 @@ static void parse_args()
    PetscOptionsGetString(PETSC_NULL, NULL, "-output_directory", output_directory, PATH_MAX, &flg);
    PetscOptionsGetString(PETSC_NULL, NULL, "-output_prefix",    output_prefix,    PATH_MAX, &flg);
    PetscOptionsGetReal(PETSC_NULL,   NULL, "-output_threshold",&output_threshold,           &flg);
+   PetscOptionsGetString(PETSC_NULL, NULL, "-effective_resistance",    reff_path,    PATH_MAX, &flg);
    PetscOptionsGetBool(PETSC_NULL,   NULL, "-use_mpi_io",      &use_mpiio,                  &flg);
    PetscOptionsGetBool(PETSC_NULL,   NULL, "-output_final_current_only",      &output_final_current_only, &flg);
    PetscOptionsGetReal(PETSC_NULL,   NULL, "-max_distance",    &max_distance,               &flg);
@@ -99,6 +100,10 @@ static void parse_args()
    if(strlen(node_pair_file) > 0 && !file_exists(node_pair_file)) {
       message("%s does not exists\n", node_pair_file);
       MPI_Abort(MPI_COMM_WORLD, 1);
+   }
+   if(strlen(reff_path) > 0) {
+      message("Effective resistance will be written to %s.\n", reff_path);
+      truncate(reff_path, 0);  /* Empty the file now, we'll have to repoen and append to it every iteration */
    }
    if(strlen(convergence) > 0) {
       char *p;

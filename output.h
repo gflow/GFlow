@@ -32,6 +32,7 @@ extern char      output_directory[PATH_MAX];
 extern char      output_prefix[PATH_MAX];
 extern int       output_format;
 extern double    output_threshold;
+extern char      reff_path[PATH_MAX];
 extern PetscBool output_final_current_only;
 extern PetscBool use_mpiio;
 
