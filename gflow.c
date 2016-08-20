@@ -406,7 +406,7 @@ static void manager()
    start_time = microtime();
    voltages = NULL;
    for(i = 0; i < nps.count; i++) {
-      double pcoeff = 1;
+      double pcoeff = 0;
       index = nps.seq[i];
       int nodes[2]  = { R.cells[pp->pairs[index].p1.x][pp->pairs[index].p1.y].index
                       , R.cells[pp->pairs[index].p2.x][pp->pairs[index].p2.y].index };
