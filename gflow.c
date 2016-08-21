@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <signal.h>
 #include <math.h>
 #include <float.h>
 #include <zlib.h>
@@ -47,6 +48,11 @@ static char common_options[] =
 static char      habitat_file[PATH_MAX] = { 0 };
 static MPI_Comm  COMM_WORKERS;
 
+/* May be set to TRUE when the USR1 signal is caught.  Write
+ * out the current result at the end of the iteration
+ * if TRUE.  Essentially, this overrides `output_final_current_only`
+ * for a single iteration  */
+PetscBool write_next_solution = PETSC_FALSE;
 
 enum {
    TAG_ROW_RANGE,
@@ -117,6 +123,32 @@ static void parse_args()
       message("Simulation will converge at %lg\n", converge_at);
    }
    read_complete_solution();  /* TODO: Need to remove this feature */
+}
+
+void sig_usr1_master(int signal)
+{
+   if(signal == SIGUSR1) {
+      write_next_solution = PETSC_TRUE;
+   }
+}
+
+void sig_usr1_worker(int signal)
+{
+   /* Sending SIGUSR1 to `mpiexec` forwards the signal on to all
+    * processes in the MPI job.  If no handler is proivded the
+    * process aborts (ATM, not sure if this is standard or just in OSX */
+}
+
+static void init_usr1_handler(int rank)
+{
+   struct sigaction sa;
+   if(rank == 0)
+      sa.sa_handler = sig_usr1_master;
+   else
+      sa.sa_handler = sig_usr1_worker;
+   if(sigaction(SIGUSR1, &sa, NULL) == -1) {
+      message("Error; could not register handler for SIGUSR1\n");
+   }
 }
 
 static void init_node_pair_sequence(struct NodePairSequence *nps, struct PointPairs *pp)
@@ -434,8 +466,7 @@ static void manager()
       if(voltages != NULL) {
          /* if we have a previous result, save to file (all but first pass through loop) */
          pcoeff = write_result(&R, &G, index-1, voltages);
-//         if(index % 100 == 0)
-//            write_total_current(&R, &G, index);
+         write_next_solution = PETSC_FALSE;
       }
       else {
          /* we'll only enter this branch once */
@@ -503,6 +534,7 @@ int main(int argc, char *argv[])
    PetscOptionsInsertString(NULL, common_options);
    MPI_Comm_rank(PETSC_COMM_WORLD, &rank);
 
+   init_usr1_handler(rank);
    init_communicator();
    if(rank == 0)
       manager();

@@ -61,13 +61,14 @@ double write_result(struct ResistanceGrid *R,
                     int index,
                     double *voltages)
 {
+   extern PetscBool write_next_solution;
    float *current, *prev_total;
    double pcoeff;
    int    i;
 
    current = calculate_current(G, voltages);
    if(current) {
-      if(!output_final_current_only) {
+      if(!output_final_current_only || write_next_solution) {
          switch(output_format)
          {
             case OUTPUT_FORMAT_ASC:
