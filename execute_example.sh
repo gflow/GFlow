@@ -47,7 +47,7 @@ date
 	# -node_pairs 
 		# Calculate only desired node pairs if input (e.g., '${OUTPUT_DIR}/shuf.tsv \' from gshuf above). Currently not used.
 	# -converge_at
-		# Set Convergence Factor to stop calculing. Typically used in place of 'node_pairs' or if all pairwise is too
+		# Set Convergence Factor to stop calculating. Typically used in place of 'node_pairs' or if all pairwise is too
 		# computationlly time consuing.
 	# -shuffle_node_pairs
 		# Shuffles pairs for random selection. Input is binary. Currently set to shuffle below (= 1)
