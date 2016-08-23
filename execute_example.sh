@@ -6,7 +6,7 @@
 # Gflow must be compiled locally before executing this script. Dependencies for Gflow include: openmpi, hypre, and petsc. 
 # If you would like to execute a random shuffle of all pairwise, please install 'coreutils'as well.
 
-# All flags are commented below and demonstrate an example execution of GFlow. To execute script as is: type 'sh execute_example.sh' 
+# Execution flags are commented below and demonstrate an example execution of GFlow. To execute script as is: type 'sh execute_example.sh' 
 # in Terminal.
 
 which mpiexec
@@ -26,7 +26,7 @@ OUTPUT_DIR=.
 SECONDS=0
 date
 
-# All REQUIRED flags to execute GFlow are below. Please read descriptions or see example arguments for use.
+# REQUIRED flags to execute GFlow are below. Please read descriptions or see example arguments for use.
 
 #	Set Number of processes (CPUs) and call Gflow. Currently -n = 4 below
 	# -ouput_prefix
@@ -54,7 +54,7 @@ date
 	# -effective_resistance
 		# Print effective resistance to log file. Supply path for .csv
 
-# Setting Flags for execution:
+# Assigning Arguments to Flags for Execution:
 
 mpiexec -n 4 ./gflow.x \
 	-output_prefix local_ \
@@ -69,3 +69,4 @@ mpiexec -n 4 ./gflow.x \
  
 
 : "walltime: $SECONDS seconds"
+
