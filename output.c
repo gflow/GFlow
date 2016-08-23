@@ -61,14 +61,13 @@ double write_result(struct ResistanceGrid *R,
                     int index,
                     double *voltages)
 {
-   extern PetscBool write_next_solution;
    float *current, *prev_total;
    double pcoeff;
    int    i;
 
    current = calculate_current(G, voltages);
    if(current) {
-      if(!output_final_current_only || write_next_solution) {
+      if(!output_final_current_only) {
          switch(output_format)
          {
             case OUTPUT_FORMAT_ASC:
@@ -169,6 +168,8 @@ void write_asc(struct ResistanceGrid *R,
 
    if(index == -1)
       sprintf(fname, "%s/%sfinal.asc", output_directory, output_prefix);
+   else if(index < -1)
+      sprintf(fname, "%s/%ssum_%06d.asc", output_directory, output_prefix, -index);
    else
       sprintf(fname, "%s/%s%06d.asc", output_directory, output_prefix, index);
    if(compress) {

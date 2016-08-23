@@ -52,7 +52,7 @@ static MPI_Comm  COMM_WORKERS;
  * out the current result at the end of the iteration
  * if TRUE.  Essentially, this overrides `output_final_current_only`
  * for a single iteration  */
-PetscBool write_next_solution = PETSC_FALSE;
+PetscBool write_next_total_solution = PETSC_FALSE;
 
 enum {
    TAG_ROW_RANGE,
@@ -128,7 +128,7 @@ static void parse_args()
 void sig_usr1_master(int signal)
 {
    if(signal == SIGUSR1) {
-      write_next_solution = PETSC_TRUE;
+      write_next_total_solution = PETSC_TRUE;
    }
 }
 
@@ -466,7 +466,10 @@ static void manager()
       if(voltages != NULL) {
          /* if we have a previous result, save to file (all but first pass through loop) */
          pcoeff = write_result(&R, &G, index-1, voltages);
-         write_next_solution = PETSC_FALSE;
+         if(write_next_total_solution) {
+            write_total_current(&R, &G, 1-index);
+            write_next_total_solution = PETSC_FALSE;
+         }
       }
       else {
          /* we'll only enter this branch once */
