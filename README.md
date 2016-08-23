@@ -1,5 +1,6 @@
 # GFlow
 [![DOI](https://zenodo.org/badge/23503/Pbleonard/GFlow.svg)](https://zenodo.org/badge/latestdoi/23503/Pbleonard/GFlow)
+[![License (GPL version 3)](https://img.shields.io/badge/license-GNU%20GPL%20version%203-red.svg?style=flat-square)](http://opensource.org/licenses/GPL-3.0)
 
 Software for modeling circuit theory-based connectivity at any scale. We developed GFlow to solve large ecological problems in a High Performance Computing environment. If solving a small problem or if you are willing to sacrifice some performance, it can be deployed on a desktop computer.
 
@@ -53,14 +54,28 @@ directory.
 1. Navigate to the directory where you downloaded GFlow. 
 
 2. Extract the zipped example input files (`inputs.tar.gz`) into the current directory. *E.g., using terminal:*
-```
+	```
     tar xvf inputs.tar.gz
-```
+	```
 3. Open the commented example `execute_example.sh` script with your favorite text editor and examine the format, default settings, and save any necessary 
 adjustments. Otherwise, the script is ready to submit and solve the example problem.
 
 4. If terminal is not open, open now and navigate to GFlow directory. Execute script:
-```
+	```
     sh execute_example.sh
-```
+	```
+5. To stop execution after any iteration, simply open another Terminal window and navigate to the working directory of GFlow. Enter `touch killswitch`. The simulation will cleanly exit after the current calculation and write the existing current density summation.
+
+	1. To print the existing summation of current density without stopping the execution, simply open another Terminal window and navigate to the working directory of GFlow. We need to get the Process ID (PID). Enter:
+
+		```
+		ps aux | grep mpiexec
+		``` 
+
+	2. Take note of the retunred PID value and enter this where your value = PID:
+
+		```
+		kill -USR1 PID
+		```
+
 
