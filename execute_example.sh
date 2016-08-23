@@ -48,7 +48,7 @@ date
 		# Calculate only desired node pairs if input (e.g., '${OUTPUT_DIR}/shuf.tsv \' from gshuf above). Currently not used.
 	# -converge_at
 		# Set Convergence Factor to stop calculating. Typically used in place of 'node_pairs' or if all pairwise is too
-		# computationlly time consuing. Acceptable formats include: '4N' or '.0001'. Set to '1N' Below. 
+		# computationlly time consuing. Acceptable formats include: '4N' or '.9999'. Set to '1N' Below. 
 	# -shuffle_node_pairs
 		# Shuffles pairs for random selection. Input is binary. Currently set to shuffle below (= 1)
 	# -effective_resistance
