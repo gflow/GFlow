@@ -51,9 +51,9 @@ directory.
 
 **Easiest using Terminal** 
 
-1. Navigate to the directory where you downloaded GFlow. 
+1. Navigate to the directory where you downloaded GFlow and extract. 
 
-2. Extract the zipped example input files (`inputs.tar.gz`) into the current directory. *E.g., using terminal:*
+2. Extract the zipped example input files (`inputs.tar.gz`) into the current GFlow directory. *E.g., using terminal:*
 	```
     tar xvf inputs.tar.gz
 	```
