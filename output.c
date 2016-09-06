@@ -216,6 +216,7 @@ void write_asc(struct ResistanceGrid *R,
       for(; gy < R->ncols; gy++)
          file_printf(fout, "-9999 ");
       file_printf(fout, "\n");
+      gy = 0;
    }
    file_close(fout);
    message("Result %s written.\n", fname);
