@@ -35,5 +35,6 @@ struct ResistanceGrid
 
 void parse_habitat_file(struct ResistanceGrid *R, const char *habitat_file);
 void free_habitat(struct ResistanceGrid *R);
+void discard_islands(struct ResistanceGrid *R);
 
 #endif  /* HABITAT_H */

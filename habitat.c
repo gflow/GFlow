@@ -123,3 +123,90 @@ void free_habitat(struct ResistanceGrid *R)
    PetscFree(R->cells[0]);
    PetscFree(R->cells);
 }
+
+void discard_islands(struct ResistanceGrid *R)
+{
+   int    i, j;
+   int **labels, *label_buffer;
+   typedef struct { int x,y; } ToDo_t;
+   ToDo_t *todo;
+   int current_label, current_area, top, largest_label, largest_area;
+
+   PetscMalloc(sizeof(int) * R->nrows * R->ncols, &label_buffer);
+   PetscMalloc(sizeof(int *) * R->nrows, &labels);
+   PetscMalloc(sizeof(ToDo_t) * R->nrows * R->ncols, &todo);  /* overkill. will never need to be this large, but no point in making a dynamic allocation scheme for this */
+   for(i = 0; i < R->nrows; i++) {
+      labels[i] = &label_buffer[i * R->ncols];
+   }
+   memset(label_buffer, 0, sizeof(int) * R->nrows * R->ncols); /* 0 is the "unseen" label */
+
+   current_label = 1;
+   largest_label = 0;
+   largest_area  = 0;
+
+   for(i = 0; i < R->nrows; i++) {
+      for(j = 0; j < R->ncols; j++) {
+         if(labels[i][j] != 0)
+            continue;
+         if(R->cells[i][j].value <= 0) {  /* NODATA */
+            labels[i][j] = -1;
+            continue;
+         }
+
+	 /* Starting a new contiguous landmass */
+         todo[0].x = i; todo[0].y = j; top = 1;
+         current_area = 0;
+         while(top > 0) {
+            ++current_area;
+            --top;
+            int a = todo[top].x, b = todo[top].y;
+            labels[a][b] = current_label;
+            /* How long can we get away without checking for diagonal neighbors? */
+            if(a > 1 && labels[a-1][b] == 0 && R->cells[a-1][b].value > 0) {
+               todo[top].x = a - 1;
+               todo[top].y = b;
+               ++top;
+            }
+            if(b > 1 && labels[a][b-1] == 0 && R->cells[a][b-1].value > 0) {
+               todo[top].x = a;
+               todo[top].y = b - 1;
+               ++top;
+            }
+            if(a < R->nrows-1 && labels[a+1][b] == 0 && R->cells[a+1][b].value > 0) {
+               todo[top].x = a + 1;
+               todo[top].y = b;
+               ++top;
+            }
+            if(b < R->ncols-1 && labels[a][b+1] == 0 && R->cells[a][b+1].value > 0) {
+               todo[top].x = a;
+               todo[top].y = b + 1;
+               ++top;
+            }
+         }
+         if(current_area > largest_area) {
+            largest_label = current_label;
+            largest_area  = current_area;
+         }
+         ++current_label;
+      }
+   }
+   R->cell_count = 0;
+   int nremoved = 0;
+   for(i = 0; i < R->nrows; i++) {
+      for(j = 0; j < R->ncols; j++) {
+         if(labels[i][j] == -1)
+            continue;
+         if(labels[i][j] != largest_label) {
+            R->cells[i][j].index = -1;
+            ++nremoved;
+         }
+         else
+            R->cells[i][j].index = R->cell_count++;
+      }
+   }
+   message("Removed %d islands (%d cells).\n", current_label-2, nremoved);
+
+   PetscFree(label_buffer);
+   PetscFree(labels);
+}
+

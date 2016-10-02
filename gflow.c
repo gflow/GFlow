@@ -425,6 +425,7 @@ static void manager()
    assert(habitat_file != NULL);
    assert(node_file != NULL);
    parse_habitat_file(&R, habitat_file);
+   discard_islands(&R);
    pp = init_point_pairs(&R);
    init_node_pair_sequence(&nps, pp);
    init_conductance(&R, &G);
