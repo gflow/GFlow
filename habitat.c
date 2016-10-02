@@ -132,8 +132,8 @@ void discard_islands(struct ResistanceGrid *R)
    ToDo_t *todo;
    int current_label, current_area, top, largest_label, largest_area;
 
-   PetscMalloc(sizeof(int) * R->nrows * R->ncols, &label_buffer);
-   PetscMalloc(sizeof(int *) * R->nrows, &labels);
+   PetscMalloc(sizeof(int)    * R->nrows * R->ncols, &label_buffer);
+   PetscMalloc(sizeof(int *)  * R->nrows, &labels);
    PetscMalloc(sizeof(ToDo_t) * R->nrows * R->ncols, &todo);  /* overkill. will never need to be this large, but no point in making a dynamic allocation scheme for this */
    for(i = 0; i < R->nrows; i++) {
       labels[i] = &label_buffer[i * R->ncols];
@@ -198,6 +198,7 @@ void discard_islands(struct ResistanceGrid *R)
             continue;
          if(labels[i][j] != largest_label) {
             R->cells[i][j].index = -1;
+            R->cells[i][j].value = R->NODATA_value;
             ++nremoved;
          }
          else
