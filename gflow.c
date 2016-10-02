@@ -130,6 +130,9 @@ void sig_usr1_master(int signal)
    if(signal == SIGUSR1) {
       write_next_total_solution = PETSC_TRUE;
    }
+   else {
+      message("Signal %d recieved.\n", signal);
+   }
 }
 
 void sig_usr1_worker(int signal)
@@ -146,9 +149,10 @@ static void init_usr1_handler(int rank)
       sa.sa_handler = sig_usr1_master;
    else
       sa.sa_handler = sig_usr1_worker;
-   if(sigaction(SIGUSR1, &sa, NULL) == -1) {
+   if(sigaction(SIGUSR1, &sa, NULL) == -1)
       message("Error; could not register handler for SIGUSR1\n");
-   }
+   if(sigaction(SIGTERM, &sa, NULL) == -1)
+      message("Error; could not register handler for SIGTERM\n");
 }
 
 static void init_node_pair_sequence(struct NodePairSequence *nps, struct PointPairs *pp)
@@ -537,8 +541,8 @@ int main(int argc, char *argv[])
    PetscOptionsInsertString(NULL, common_options);
    MPI_Comm_rank(PETSC_COMM_WORLD, &rank);
 
-   init_usr1_handler(rank);
    init_communicator();
+   init_usr1_handler(rank);
    if(rank == 0)
       manager();
    else 
