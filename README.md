@@ -47,7 +47,7 @@ directory.
 
 ## Running 
 
-*Instructions apply to Mac Desktop Computers only. Advanced use for cluster computing follows a very similar proceedure sans submission script details.*
+*Instructions apply to Mac Desktop Computers only. Advanced use for cluster computing follows a very similar proceedure after dependencies are installed. Details of cluster scheduling/submission scripts are typically unique to given cyberinfrastructure.*
 
 **Easiest using Terminal** 
 
