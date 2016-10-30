@@ -36,7 +36,7 @@ date
 	# -habitat
 		# Set Habitat Map or resistance surface (.asc)
 	# -nodes
-		# Set Focal Nodes or Source/Destination Points (.txt list of point pairs to calculate or .asc grid)
+		# Set Focal Nodes or Source/Destination Points (.txt list of point pairs to calculate or .asc grid). Inputs must be points.
 	# -output_format
 		# Set Desired Output formaat --'asc' or 'amps' -- Default = asc
 	# -output_final_current_only
