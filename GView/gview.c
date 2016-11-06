@@ -34,6 +34,7 @@ static struct {
 static char *input_file_name = NULL;
 static char *input_mask_name = NULL;
 static char *output_file_name = NULL;
+static char *lcp_file_name = NULL;
 static int   exp_scale = 0;
 
 
@@ -67,13 +68,14 @@ void parseargs(int argc, char *argv[])
       { "help",     no_argument,       0, 'h' },
       { "mask",     required_argument, 0, 'm' },
       { "output",   required_argument, 0, 'o' },
+      { "paths ",   required_argument, 0, 'p' },
       { "colors",   required_argument, 0, 'c' },
       { "exp-scale",no_argument,       0, 'e' },
       { 0,          0,                 0,  0  } };
 
   while(1) {
       int option_index;
-      int c = getopt_long(argc, argv, "hc:o:em:", long_options, &option_index);
+      int c = getopt_long(argc, argv, "hc:o:p:em:", long_options, &option_index);
 
       if(c == -1)
          break;
@@ -89,6 +91,9 @@ void parseargs(int argc, char *argv[])
             break;
          case 'o':
             output_file_name = strdup(optarg);
+            break;
+         case 'p':
+            lcp_file_name = strdup(optarg);
             break;
          case 'e':
             exp_scale = 1;
@@ -210,6 +215,50 @@ void parse_input(const char *grid_file)
    munmap(rh, fsz);
 }
 
+void draw_least_cost_paths(struct Pixel **raster)
+{
+   size_t i, j;
+   FILE *f;
+   size_t npaths;
+   double rmin, rmax, rdist;
+   size_t pathlen;
+   unsigned *xs, *ys;
+   double alpha;
+
+#define ALPHA_MIN 0.1
+#define ALPHA_MAX 0.1
+#define THICKNESS 3
+
+   f = fopen(lcp_file_name, "r");
+   fscanf(f, "%zu %lf %lf", &npaths, &rmin, &rmax);
+   for(i = 0; i < npaths; i++) {
+      fscanf(f, "%zu %lf", &pathlen, &rdist);
+
+      xs = (unsigned *)malloc(sizeof(unsigned) * pathlen);
+      ys = (unsigned *)malloc(sizeof(unsigned) * pathlen);
+
+      for(j = 0; j < pathlen; j++) fscanf(f, "%d", &xs[j]);
+      for(j = 0; j < pathlen; j++) fscanf(f, "%d", &ys[j]);
+
+      alpha = (ALPHA_MAX - ALPHA_MIN) * (rdist - rmin) / (rmax - rmin) + ALPHA_MIN;
+      for(j = 0; j < pathlen; j++) {
+         int a,b;
+         for(a = -THICKNESS; a < THICKNESS; a++) {
+            for(b = -THICKNESS; b < THICKNESS; b++) {
+               struct Pixel *p = &raster[ys[j]+a][xs[j]+b];
+               p->r = alpha * 0xff + (1 - alpha) * p->r;
+               p->g = alpha * 0x69 + (1 - alpha) * p->g;
+               p->b = alpha * 0xb4 + (1 - alpha) * p->b;
+            }
+         }
+      }
+
+      free(xs);
+      free(ys);
+   }
+   fclose(f);
+}
+
 void getPixel(struct Pixel p, double *r, double *g, double *b)
 {
    *r = (double)p.r / 255.;
@@ -247,9 +296,9 @@ void parse_grid(char *gfile)
       for(j = 0; j < ncols; j++) {
          grid[i][j] = strtod(p, &q);
          p = q;
-         //if(grid[i][j] != NODATA_value) {
          if(grid[i][j] > 0) {
-            if(aptr) grid[i][j] = *aptr++;
+            if(aptr)
+               grid[i][j] = *aptr++;
             hi = fmax(hi, grid[i][j]);
             lo = fmin(lo, grid[i][j]);
          }
@@ -295,6 +344,9 @@ void parse_grid(char *gfile)
          }
       }
    }
+
+   if(lcp_file_name)
+      draw_least_cost_paths(raster);
 
    fout = streq(output_file_name, "-") ? stdout : fopen(output_file_name, "w");
    fprintf(fout, "P6 %d %d 255\n", ncols, nrows);
