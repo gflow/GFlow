@@ -6,9 +6,10 @@
 
 struct Path
 {
-   size_t    length;
-   unsigned *xs, *ys;
-   double    rdist;
+   size_t     length;
+   unsigned  *xs, *ys;  /* original coordinates */
+   PointInfo *pi;       /* points for ImageMagick */
+   double     rdist;
 };
 
 struct Paths
@@ -18,7 +19,7 @@ struct Paths
    double rmin, rmax;
 };
 
-void readPaths();
+void readPaths(double scale);
 void drawPaths(MagickWand *R);
 void animatePaths(MagickWand *R);
 

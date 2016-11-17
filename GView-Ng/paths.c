@@ -3,11 +3,11 @@
 #include <stdlib.h>
 #include "paths.h"
 
-char *path_file_name;
-struct Paths paths;
-extern char *output_file_name;
+char         *path_file_name;
+extern char  *output_file_name;
+struct Paths  paths;
 
-void readPaths()
+void readPaths(double scale)
 {
    FILE     *f;
    size_t    i, j;
@@ -22,50 +22,64 @@ void readPaths()
    paths.paths = (struct Path *)malloc(sizeof(struct Path) * paths.npaths);
 
    for(i = 0; i < paths.npaths; i++) {
+      struct Path *p = &paths.paths[i];
+
       fscanf(f, "%zu %lf", &paths.paths[i].length, &paths.paths[i].rdist);
 
-      paths.paths[i].xs = (unsigned *)malloc(sizeof(unsigned) * paths.paths[i].length);
-      paths.paths[i].ys = (unsigned *)malloc(sizeof(unsigned) * paths.paths[i].length);
+      p->xs = (unsigned  *)malloc(sizeof(unsigned)  * p->length);
+      p->ys = (unsigned  *)malloc(sizeof(unsigned)  * p->length);
+      p->pi = (PointInfo *)malloc(sizeof(PointInfo) * p->length);
 
-      for(j = 0; j < paths.paths[i].length; j++)
-         fscanf(f, "%d", &paths.paths[i].xs[j]);
+      for(j = 0; j < p->length; j++)
+         fscanf(f, "%d", &p->xs[j]);
 
-      for(j = 0; j < paths.paths[i].length; j++)
-         fscanf(f, "%d", &paths.paths[i].ys[j]);
+      for(j = 0; j < p->length; j++) 
+         fscanf(f, "%d", &p->ys[j]);
+
+      for(j = 0; j < p->length; j++) {
+         p->pi[j].x = p->xs[j] / scale;
+         p->pi[j].y = p->ys[j] / scale;
+      }
+      /* FIXME: Shrinking the path vectors can cause duplicates */
+ 
    }
    fclose(f);
 }
 
 void drawPaths(MagickWand *R)
 {
-   size_t    i, j;
-   double    alpha;
-   
-#define ALPHA_MIN 0.01
-#define ALPHA_MAX 0.1
-#define THICKNESS 3
+   DrawingWand  *draw = NewDrawingWand();
+   PixelWand    *p    = NewPixelWand();
+   size_t        i;
+
+   PushDrawingWand(draw);
+   DrawSetStrokeAntialias(draw, MagickTrue);
+   DrawSetStrokeWidth(draw, 1);
+   PixelSetColor(p, "#ff69b4");
+   PixelSetAlpha(p, 1);
+   DrawSetStrokeColor(draw, p);
+   DrawSetStrokeOpacity(draw, 0.8);
+
+   DrawSetFillOpacity(draw, 0);
+   PixelSetAlpha(p, 0);
+   DrawSetFillColor(draw, p);  /* needs to be *something* for opacity=0 to be recognized */
 
    for(i = 0; i < paths.npaths; i++)
    {
       struct Path *pt = &paths.paths[i];
-      alpha = (ALPHA_MAX - ALPHA_MIN) * (pt->rdist - paths.rmin) / (paths.rmax - paths.rmin) + ALPHA_MIN;
-      for(j = 0; j < pt->length; j++)
-      {
-         int a,b;
-         for(a = -THICKNESS; a < THICKNESS; a++) {
-            for(b = -THICKNESS; b < THICKNESS; b++) {
-               struct Pixel *p = &R->pixels[pt->ys[j]+a][pt->xs[j]+b];
-               p->r = alpha * 0xff + (1 - alpha) * p->r;
-               p->g = alpha * 0x69 + (1 - alpha) * p->g;
-               p->b = alpha * 0xb4 + (1 - alpha) * p->b;
-            }
-         }
-      }
+      DrawPolyline(draw, pt->length, pt->pi);
    }
+
+   PopDrawingWand(draw);
+   MagickDrawImage(R, draw);
+
+   DestroyDrawingWand(draw);
+   DestroyPixelWand(p);
 }
 
 void animatePaths(MagickWand *R)
 {
+#if 0
 #define TAIL_LEN  100
 #define MAX_SPEED 15
 
@@ -115,4 +129,5 @@ void animatePaths(MagickWand *R)
       if(all_done)
          break;
    }
+#endif
 }

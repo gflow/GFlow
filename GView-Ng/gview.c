@@ -11,7 +11,6 @@
 
 #include <wand/magick_wand.h>
 
-#include "fileutil.h"
 #include "colors.h"
 #include "image.h"
 #include "paths.h"
@@ -22,8 +21,8 @@ size_t  output_width     = 0;
 int   exp_scale = 0;
 int   animate = 0;
 
-//extern char *path_file_name;
-//extern struct Paths paths;
+extern char         *path_file_name;
+extern struct Paths  paths;
 
 void usage(char *exe)
 {
@@ -61,7 +60,7 @@ void parseargs(int argc, char *argv[])
             output_width = atoi(optarg);
             break;
          case 'p':
-            //path_file_name = strdup(optarg);
+            path_file_name = strdup(optarg);
             break;
          case 'a':
             animate = 1;
@@ -82,6 +81,7 @@ void parseargs(int argc, char *argv[])
 int main(int argc, char *argv[])
 {
    MagickWand *R;
+   size_t width, height;
    parseargs(argc, argv);
    if(ColorScale.count == 0) 
       set_color_theme("rgb");
@@ -89,32 +89,32 @@ int main(int argc, char *argv[])
    MagickWandGenesis();
 
    R = loadImage();
+   width  = MagickGetImageWidth(R);
+   height = MagickGetImageHeight(R);
 
-   if(output_width > 0) {
-      size_t width  = MagickGetImageWidth(R)
-	   , height = MagickGetImageHeight(R);
-      MagickResizeImage(R, output_width, height * output_width / width, LanczosFilter, 1);
+   if(0 < output_width  && output_width < width) {
+      double output_height = (height + 0.) * output_width / width;
+      MagickResizeImage(R, output_width, output_height, LanczosFilter, 1);
    }
+   else
+      output_width = width;
 
-
-   MagickWriteImage(R, output_file_name);
-/*
-   readPaths();
+   readPaths((width + 0.) / output_width);
 
    if(paths.npaths > 0) {
       if(animate) {
-         animatePaths(&R);
+//         animatePaths(&R);
       }
       else {
-         drawPaths(&R);
-         saveRaster(&R, output_file_name);
+         drawPaths(R);
+         MagickWriteImage(R, output_file_name);
       }
    }
    else {
-      saveRaster(&R, output_file_name);
+      MagickWriteImage(R, output_file_name);
    }
-*/
 
    DestroyMagickWand(R);
+   MagickWandTerminus();
    return 0;
 }
