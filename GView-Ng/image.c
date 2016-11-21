@@ -8,6 +8,7 @@
 #include <float.h>
 #include <math.h>
 #include <wand/magick_wand.h>
+#include <shapefil.h>
 
 #include "fileutil.h"
 #include "colors.h"
@@ -16,6 +17,13 @@
 #define streq(X,Y) (strcmp((X),(Y))==0)
 
 extern char *input_file_name;
+extern char *bounds_file_name;
+
+static void drawBoundaries(MagickWand *R,
+                           size_t nrows,
+                           double xllcorner,
+                           double yllcorner,
+                           double cellsize);
 
 static double **createGrid(int nrows, int ncols)
 {
@@ -147,6 +155,8 @@ static MagickWand *parseGrid(char *file_contents)
    free(grid[0]);
    free(grid);
 
+   drawBoundaries(R, nrows, xllcorner, yllcorner, cellsize);
+
    return R;
 }
 
@@ -157,5 +167,68 @@ MagickWand *loadImage()
    MagickWand *result = parseGrid(rh);
    munmap(rh, fsz);
    return result;
+}
+
+void drawBoundaries(MagickWand *R,
+                    size_t nrows,
+                    double xllcorner,
+                    double yllcorner,
+                    double cellsize)
+{
+   PixelWand *pWhite, *pBlank;
+   SHPHandle shp;
+   int nobjects, o;
+
+   if(bounds_file_name == NULL)
+      return;
+
+   pWhite = NewPixelWand();
+   PixelSetColor(pWhite, "white");
+   PixelSetAlpha(pWhite, 1);
+
+   pBlank = NewPixelWand();
+   PixelSetColor(pBlank, "black");
+   PixelSetAlpha(pBlank, 0);
+
+   shp = SHPOpen(bounds_file_name, "rb");
+   SHPGetInfo(shp, &nobjects, NULL, NULL, NULL);
+
+   DrawingWand *draw = NewDrawingWand();
+   PushDrawingWand(draw);
+   for(o = 0; o < nobjects; ++o)
+   {
+      SHPObject *obj = SHPReadObject(shp, o);
+      if(obj == NULL)
+         continue;
+
+      PointInfo points[obj->nVertices];
+      int i, n;
+      n = (obj->nParts == 0) ? obj->nVertices : obj->panPartStart[1]-1 ;
+      if(n <= 0)
+         continue;  /* TODO: investigate */
+
+      for(i = 0; i < n; i++) {
+         points[i].x = (obj->padfX[i] - xllcorner) / cellsize;
+         points[i].y = nrows + (yllcorner - obj->padfY[i]) / cellsize;
+      }
+      SHPDestroyObject(obj);
+
+      DrawSetStrokeAntialias(draw, MagickTrue);
+      DrawSetStrokeWidth(draw,     4);
+      DrawSetStrokeColor(draw,     pWhite);
+      DrawSetStrokeOpacity(draw,   0);
+
+      DrawSetFillColor(draw,   pBlank);
+      DrawSetFillOpacity(draw, 1);
+
+      DrawPolygon(draw, n, points);
+   }
+   PopDrawingWand(draw);
+   MagickDrawImage(R, draw);
+
+   DestroyPixelWand(pWhite);
+   DestroyPixelWand(pBlank);
+   DestroyDrawingWand(draw);
+   SHPClose(shp);
 }
 

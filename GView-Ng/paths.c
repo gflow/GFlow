@@ -11,6 +11,8 @@ void readPaths(double scale)
 {
    FILE     *f;
    size_t    i, j;
+   unsigned *xs, *ys;
+   size_t    length;
 
    if(path_file_name == NULL) {
       paths.npaths = 0;
@@ -23,25 +25,35 @@ void readPaths(double scale)
 
    for(i = 0; i < paths.npaths; i++) {
       struct Path *p = &paths.paths[i];
+      int jx, jy;
 
-      fscanf(f, "%zu %lf", &paths.paths[i].length, &paths.paths[i].rdist);
+      fscanf(f, "%zu %lf", &length, &p->rdist);
 
-      p->xs = (unsigned  *)malloc(sizeof(unsigned)  * p->length);
-      p->ys = (unsigned  *)malloc(sizeof(unsigned)  * p->length);
-      p->pi = (PointInfo *)malloc(sizeof(PointInfo) * p->length);
+      xs = (unsigned  *)malloc(sizeof(unsigned) * length);
+      ys = (unsigned  *)malloc(sizeof(unsigned) * length);
+      p->pi = (PointInfo *)malloc(sizeof(PointInfo) * length);
 
-      for(j = 0; j < p->length; j++)
-         fscanf(f, "%d", &p->xs[j]);
+      for(j = 0; j < length; j++)
+         fscanf(f, "%d", &xs[j]);
 
-      for(j = 0; j < p->length; j++) 
-         fscanf(f, "%d", &p->ys[j]);
+      for(j = 0; j < length; j++) 
+         fscanf(f, "%d", &ys[j]);
 
-      for(j = 0; j < p->length; j++) {
-         p->pi[j].x = p->xs[j] / scale;
-         p->pi[j].y = p->ys[j] / scale;
+      jx = 5 - (rand() % 10);
+      jy = 5 - (rand() % 10);
+      p->length = 0;
+      for(j = 0; j < length; j++) {
+         if(j > 0 && xs[j] == xs[j-1] && ys[j] == ys[j-1]) {
+            continue;
+         }
+         p->pi[p->length].x = xs[j] / scale + jx;
+         p->pi[p->length].y = ys[j] / scale + jy;
+         ++p->length;
       }
       /* FIXME: Shrinking the path vectors can cause duplicates */
  
+      free(xs);
+      free(ys);
    }
    fclose(f);
 }
@@ -79,55 +91,72 @@ void drawPaths(MagickWand *R)
 
 void animatePaths(MagickWand *R)
 {
-#if 0
-#define TAIL_LEN  100
-#define MAX_SPEED 15
+   PixelWand    *p = NewPixelWand();
+   size_t        i, f;
+   size_t       *length, *space, *start;
+   double       *speed;
+   char          filename[80];
 
-   int frame;
-   size_t    i, j;
-   struct Raster bg; /* make a copy for the background */
-   char frame_file_name[80];
-   double alpha;
-   int all_done;
-
-   frame = 0;
-   while(1)
+   length = (size_t *)malloc(sizeof(size_t) * paths.npaths);
+   space  = (size_t *)malloc(sizeof(size_t) * paths.npaths);
+   start  = (size_t *)malloc(sizeof(size_t) * paths.npaths);
+   speed  = (double *)malloc(sizeof(double) * paths.npaths);
+#define min_length 15
+#define max_length 30
+#define min_space  50
+#define max_space 100
+   for(i = 0; i < paths.npaths; i++)
    {
-      cloneRaster(&bg, R);
+      length[i] = min_length + (rand() % (max_length - min_length));
+      space[i]  = min_space  + (rand() % (max_space  - min_space));
+      start[i]  = rand() % (length[i] + space[i]);
+      speed[i]  = (1. - (paths.paths[i].rdist - paths.rmin) / (paths.rmax - paths.rmin)) * 40. + 1.;
+   }
 
-      all_done = 1;
+   for(f = 0; f < 24; f++)
+   {
+      MagickWand  *frame = CloneMagickWand(R);
+      DrawingWand *draw = NewDrawingWand();
+      PushDrawingWand(draw);
+
+      DrawSetStrokeAntialias(draw, MagickTrue);
+      DrawSetStrokeWidth(draw, 2);
+      PixelSetColor(p, "#ff69b4");
+      PixelSetAlpha(p, 1);
+      DrawSetStrokeColor(draw, p);
+      DrawSetStrokeOpacity(draw, 0.65);
+
+      DrawSetFillOpacity(draw, 0);
+      PixelSetAlpha(p, 0);
+      DrawSetFillColor(draw, p);  /* needs to be *something* for opacity=0 to be recognized */
+
       for(i = 0; i < paths.npaths; i++)
       {
+         int j;
          struct Path *pt = &paths.paths[i];
-         int start = frame + MAX_SPEED * (pt->rdist - paths.rmin) / (paths.rmax - paths.rmin);
-         alpha = 0.2 * (pt->rdist - paths.rmin) / (paths.rmax - paths.rmin);
-         if(start >= pt->length)
-            continue;
-
-         for(j = 0; j < TAIL_LEN; j++)
-         {
-            int a,b;
-            if(start < j)
-               continue;
-            all_done = 0;
-            for(a = -THICKNESS; a < THICKNESS; a++) {
-               for(b = -THICKNESS; b < THICKNESS; b++) {
-                  struct Pixel *p = &bg.pixels[pt->ys[start-j]+a][pt->xs[start-j]+b];
-                  p->r = alpha * 0xff + (1 - alpha) * p->r;
-                  p->g = alpha * 0x69 + (1 - alpha) * p->g;
-                  p->b = alpha * 0xb4 + (1 - alpha) * p->b;
-               }
-            }
+         j = (int)(start[i] + speed[i] * f) % (length[i] + space[i]);
+//   printf("strt=%zu length=%zu space=%zu\n", start[i], length[i], space[i]);
+         while(j < pt->length) {
+            size_t n = (j + length[i]) > pt->length ? pt->length - j : length[i];
+            DrawPolyline(draw, n, pt->pi + j);
+            j += space[i] + length[i];
+//   printf("j=%d n=%zu\n", j, n);
          }
       }
-      sprintf(frame_file_name, output_file_name, frame);
-      printf("fn = %s\n", frame_file_name);
-      saveRaster(&bg, frame_file_name);
-      delRaster(&bg);
+      sprintf(filename, "frame%05zu.png", f);
+printf("fn = '%s'\n", filename);
+      PopDrawingWand(draw);
+      MagickDrawImage(frame, draw);
 
-      frame += 1;
-      if(all_done)
-         break;
+      MagickWriteImage(frame, filename);
+      DestroyDrawingWand(draw);
+      DestroyMagickWand(frame);
    }
-#endif
+
+   free(length);
+   free(space);
+   free(start);
+   free(speed);
+
+   DestroyPixelWand(p);
 }

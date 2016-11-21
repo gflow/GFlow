@@ -17,6 +17,7 @@
 
 char   *input_file_name  = NULL;
 char   *output_file_name = NULL;
+char   *bounds_file_name = NULL;
 size_t  output_width     = 0;
 int   exp_scale = 0;
 int   animate = 0;
@@ -34,6 +35,7 @@ void parseargs(int argc, char *argv[])
    static struct option long_options[] = {
       { "help",     no_argument,       0, 'h' },
       { "output",   required_argument, 0, 'o' },
+      { "bounds",   required_argument, 0, 'b' },
       { "width",    required_argument, 0, 'w' },
       { "paths ",   required_argument, 0, 'p' },
       { "colors",   required_argument, 0, 'c' },
@@ -42,7 +44,7 @@ void parseargs(int argc, char *argv[])
 
   while(1) {
       int option_index;
-      int c = getopt_long(argc, argv, "hc:o:w:p:em:a", long_options, &option_index);
+      int c = getopt_long(argc, argv, "hc:o:b:w:p:em:a", long_options, &option_index);
 
       if(c == -1)
          break;
@@ -55,6 +57,9 @@ void parseargs(int argc, char *argv[])
             break;
          case 'o':
             output_file_name = strdup(optarg);
+            break;
+         case 'b':
+            bounds_file_name = strdup(optarg);
             break;
          case 'w':
             output_width = atoi(optarg);
@@ -86,6 +91,7 @@ int main(int argc, char *argv[])
    if(ColorScale.count == 0) 
       set_color_theme("rgb");
 
+   srand(time(0));
    MagickWandGenesis();
 
    R = loadImage();
@@ -103,7 +109,8 @@ int main(int argc, char *argv[])
 
    if(paths.npaths > 0) {
       if(animate) {
-//         animatePaths(&R);
+         animatePaths(R);
+//         MagickWriteImage(R, output_file_name);
       }
       else {
          drawPaths(R);

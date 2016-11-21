@@ -7,7 +7,6 @@
 struct Path
 {
    size_t     length;
-   unsigned  *xs, *ys;  /* original coordinates */
    PointInfo *pi;       /* points for ImageMagick */
    double     rdist;
 };
