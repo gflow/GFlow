@@ -2,7 +2,7 @@
 [![DOI](https://zenodo.org/badge/23503/Pbleonard/GFlow.svg)](https://zenodo.org/badge/latestdoi/23503/Pbleonard/GFlow)
 [![License (GPL version 3)](https://img.shields.io/badge/license-GNU%20GPL%20version%203-red.svg?style=flat-square)](http://opensource.org/licenses/GPL-3.0)
 
-Software for modeling circuit theory-based connectivity at any scale. We developed GFlow to solve large ecological problems in a High Performance Computing environment. If solving a small problem or if you are willing to sacrifice some performance, it can be deployed on a desktop computer.
+Software for modeling circuit theory-based connectivity at any scale. We developed GFlow to solve large ecological problems in a High Performance Computing environment. If solving a small problem or if you are willing to sacrifice some performance, it can be deployed on a desktop computer running modern versions of Linux or Mac OS X.
 
 ## Installation
 
