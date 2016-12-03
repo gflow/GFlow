@@ -8,7 +8,7 @@ Software for modeling circuit theory-based connectivity at any scale. We develop
 
 ### [Please download latest release with sample data.] (https://github.com/Pbleonard/GFlow/releases/latest)
 
-### Mac OS X
+### Mac OS X Install Instructions
 The easiest way to setup your environment is with the
 [Homebrew](http://brew.sh) package manager.
 After Homebrew is set up, run the following commands to install
@@ -35,7 +35,7 @@ Currently, there is no mechanism to automatically copy the `gflow.x` binary to a
 directory.
 
 
-### Linux
+### Linux Install Instructions
 
 *Coming soon*...
 
@@ -47,7 +47,7 @@ directory.
 
 ## Running 
 
-*Instructions apply to Mac Desktop Computers only. Advanced use for cluster computing follows a very similar proceedure after dependencies are installed. Details of cluster scheduling/submission scripts are typically unique to given cyberinfrastructure.*
+*Instructions below apply to Mac Desktop Computers only although the software is Linux compatible. Advanced use for cluster computing follows a very similar proceedure after dependencies are installed. Details of cluster scheduling/submission scripts are typically unique to given cyberinfrastructure.*
 
 **Easiest using Terminal** 
 
