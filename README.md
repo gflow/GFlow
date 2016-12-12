@@ -36,9 +36,32 @@ directory.
 
 
 ### Linux Install Instructions
+While users are free to build GFlow dependcies themselves, we find a package manager is suitable for many users and the easiest way to get started. The following instructions apply to the manager [Aptitude] (https://help.ubuntu.com/lts/serverguide/aptitude.html) using Ubuntu v. 16.10. To Install Aptitude, fun the following command in terminal:
+	
+	sudo apt-get install aptitude
 
-*Coming soon*...
+Then the dependices using aptitude (you may need to be root e.g., use `sudo` prefix as above):
 
+	aptitude install openmpi-bin
+	aptitude install libhypre-dev
+	aptitude install petsc-dev
+	
+**Note**: Advanced users may build their own versions of PETSc and an MPI library, `gflow` does not require
+any specific preconditioner (we recommend `hypre`) nor does it depend on a particular MPI implementation.
+
+With the required packages installed, `gflow` can be built by running the following command:
+
+     make
+
+If you encounter errors related to PETSc, you may have to edit the `Makefile` to change the 
+value of the `PETSC_DIR` variable. For example, during the above proceedure, aptitude installed petsc here:
+
+	/usr/lib/petscdir/3.7.3/x86_64-linux-gnu-real
+	
+**Note**: If you receive warnings after `make` but no errors, please try to proceed with using GFlow
+
+Currently, there is no mechanism to automatically copy the `gflow.x` binary to a centrally-located
+directory.
 
 ### Windows
 
@@ -47,7 +70,7 @@ directory.
 
 ## Running 
 
-*Instructions below apply to Mac Desktop Computers only although the software is Linux compatible. Advanced use for cluster computing follows a very similar proceedure after dependencies are installed. Details of cluster scheduling/submission scripts are typically unique to given cyberinfrastructure.*
+*Instructions below apply to Desktop Computers. Advanced use for cluster computing follows a very similar proceedure after dependencies are installed. Details of cluster scheduling/submission scripts are typically unique to given cyberinfrastructure.*
 
 **Easiest using Terminal** 
 
