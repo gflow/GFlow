@@ -24,7 +24,7 @@ the required packages:
 any specific preconditioner (we recommend `hypre`) nor does it depend on a particular
 MPI implementation.
 
-With the required packages installed, `gflow` can be built by running the following command:
+With the required packages installed, `gflow` can be built inside its containing folder by running the following terminal command there:
 
      make
      
@@ -36,7 +36,7 @@ directory.
 
 
 ### Linux Install Instructions
-While users are free to build GFlow dependcies themselves, we find a package manager is suitable for many users and the easiest way to get started. The following instructions apply to the manager [Aptitude] (https://help.ubuntu.com/lts/serverguide/aptitude.html) using Ubuntu v. 16.10. To Install Aptitude, fun the following command in terminal:
+While users are free to build GFlow dependcies themselves, we find a package manager is suitable for many users and the easiest way to get started. The following instructions apply to the manager [Aptitude] (https://help.ubuntu.com/lts/serverguide/aptitude.html) using Ubuntu v. 16.10. To Install Aptitude, run the following command in terminal:
 	
 	sudo apt-get install aptitude
 
@@ -49,7 +49,7 @@ Then the dependices using aptitude (you may need to be root e.g., use `sudo` pre
 **Note**: Advanced users may build their own versions of PETSc and an MPI library, `gflow` does not require
 any specific preconditioner (we recommend `hypre`) nor does it depend on a particular MPI implementation.
 
-With the required packages installed, `gflow` can be built by running the following command:
+With the required packages installed, `gflow` can be built from its containing folder by running the following terminal command there:
 
      make
 
