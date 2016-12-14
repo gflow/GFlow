@@ -36,7 +36,10 @@ directory.
 
 
 ### Linux Install Instructions
-While users are free to build GFlow dependcies themselves, we find a package manager is suitable for many users and the easiest way to get started. The following instructions apply to the manager [Aptitude] (https://help.ubuntu.com/lts/serverguide/aptitude.html) using Ubuntu v. 16.10. To Install Aptitude, run the following command in terminal:
+While users are free to build GFlow dependcies themselves, we find a package manager is suitable for many users and the easiest way to get started. For example on Ubuntu based systems you can use the default package management tool called apt [apt] (https://help.ubuntu.com/lts/serverguide/apt.html) or optionally install and use [Aptitude] (https://help.ubuntu.com/lts/serverguide/aptitude.html) 
+
+
+To Install Aptitude, run the following command in terminal:
 	
 	sudo apt-get install aptitude
 
@@ -47,7 +50,8 @@ Then the dependices using aptitude (you may need to be root e.g., use `sudo` pre
 	aptitude install petsc-dev
 	
 **Note**: Advanced users may build their own versions of PETSc and an MPI library, `gflow` does not require
-any specific preconditioner (we recommend `hypre`) nor does it depend on a particular MPI implementation.
+any specific preconditioner (we recommend `hypre`) nor does it depend on a particular MPI implementation but it needs PETSc >= 3.7.3
+that is available as ready to install/use package on Ubuntu v. 16.10 (but not on 16.04). 
 
 With the required packages installed, `gflow` can be built from its containing folder by running the following terminal command there:
 
@@ -87,6 +91,8 @@ adjustments. Otherwise, the script is ready to submit and solve the example prob
 	```
     sh execute_example.sh
 	```
+**Note**: On Linux you must edit the execute_example.sh file and change the `PETSC_DIR` parameter as done previously for the `Makefile` file
+	
 5. To stop execution after any iteration, simply open another Terminal window and navigate to the working directory of GFlow. Enter `touch killswitch`. The simulation will cleanly exit after the current calculation and write the existing current density summation.
 
 	1. To print the existing summation of current density without stopping the execution, simply open another Terminal window and navigate to the working directory of GFlow. We need to get the Process ID (PID). Enter:
