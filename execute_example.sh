@@ -1,9 +1,9 @@
 #!/bin/bash -x
 
-# This script is a documented working example of Gflow with 4-5 random pairwise computations (until convergence = 1N) 
-# using 4 cpus on Mac OSX and output only the current density summation. 
-# The default inputs include 588 node pairs that solve > 34.25 million unknowns. 
-# Gflow must be compiled locally before executing this script. Dependencies for Gflow include: openmpi, hypre, and petsc. 
+# This script is a documented working example of Gflow with a handful of random pairwise computations (until convergence = 1N) 
+# using 4 cpus on Mac OSX where output is only the current density summation. 
+
+# Gflow must be compiled locally before executing this script. Dependencies for GFlow include: openmpi, hypre, and petsc. 
 # If you would like to execute a random shuffle of all pairwise, please install 'coreutils'as well.
 
 # Execution flags are commented below and demonstrate an example execution of GFlow. To execute script as is: type 'sh execute_example.sh' 
@@ -11,7 +11,7 @@
 
 which mpiexec
 
-# Set and add PETSc to PATH
+# Set and add PETSc to PATH (Please update this if you are using Linux or any installation proceedure that differs from the README)
 export PETSC_DIR=/usr/local/Cellar/petsc/3.7.3/real
 export LD_LIBRARY_PATH=${PETSC_DIR}/lib:$LD_LIBRARY_PATH
 
@@ -37,6 +37,7 @@ date
 		# Set Habitat Map or resistance surface (.asc)
 	# -nodes
 		# Set Focal Nodes or Source/Destination Points (.txt list of point pairs to calculate or .asc grid). Inputs must be points.
+		# If using a .txt list, the point coorindates must be relative to the resistance surface grid. Please look at example inputs.
 	# -output_format
 		# Set Desired Output formaat --'asc' or 'amps' -- Default = asc
 	# -output_final_current_only
