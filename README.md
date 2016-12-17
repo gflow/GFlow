@@ -91,7 +91,7 @@ adjustments. Otherwise, the script is ready to submit and solve the example prob
 	```
     sh execute_example.sh
 	```
-**Note**: On Linux you must edit the execute_example.sh file and change the `PETSC_DIR` parameter as done previously for the `Makefile` file
+**Note**: You may also need to edit the execute_example.sh file to change the `PETSC_DIR` parameter as done previously for the `Makefile` file
 	
 5. To stop execution after any iteration, simply open another Terminal window and navigate to the working directory of GFlow. Enter `touch killswitch`. The simulation will cleanly exit after the current calculation and write the existing current density summation.
 
@@ -101,7 +101,7 @@ adjustments. Otherwise, the script is ready to submit and solve the example prob
 		ps aux | grep mpiexec
 		``` 
 
-	2. Take note of the retunred PID value and enter this where your value = PID:
+	2. Take note of the returned PID value and enter this where your value = PID:
 
 		```
 		kill -USR1 PID
