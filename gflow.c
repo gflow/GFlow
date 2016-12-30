@@ -75,17 +75,27 @@ static void parse_args()
 {
    const char *output_formats[3] = {  "asc", "asc.gz", "amp" };
    char convergence[PATH_MAX] = { 0 };
+
+   // Former globals. Will be removed in future release.
+   char      output_directory[PATH_MAX] = ".";
+   char      output_prefix[PATH_MAX] = { 0 };
+   int       output_format = -1;
+   PetscBool output_final_current_only = PETSC_FALSE;
    
+#define DEPRICATED(SW) if(flg) fprintf(stderr, "Use of the `" SW "` switch is depricated and will be removed in a future release.  Please use the `output_density_filename` and `output_sum_density_filename` switches instead\n");
    PetscBool flg;
    PetscOptionsGetString(PETSC_NULL, NULL, "-habitat",          habitat_file,     PATH_MAX, &flg);
    PetscOptionsGetString(PETSC_NULL, NULL, "-nodes",            node_file,        PATH_MAX, &flg);
    PetscOptionsGetString(PETSC_NULL, NULL, "-node_pairs",       node_pair_file,   PATH_MAX, &flg);
    PetscOptionsGetString(PETSC_NULL, NULL, "-output_directory", output_directory, PATH_MAX, &flg);
+   DEPRICATED("output_directory");
    PetscOptionsGetString(PETSC_NULL, NULL, "-output_prefix",    output_prefix,    PATH_MAX, &flg);
+   DEPRICATED("output_prefix");
    PetscOptionsGetReal(PETSC_NULL,   NULL, "-output_threshold",&output_threshold,           &flg);
    PetscOptionsGetString(PETSC_NULL, NULL, "-effective_resistance",    reff_path,    PATH_MAX, &flg);
    PetscOptionsGetBool(PETSC_NULL,   NULL, "-use_mpi_io",      &use_mpiio,                  &flg);
    PetscOptionsGetBool(PETSC_NULL,   NULL, "-output_final_current_only",      &output_final_current_only, &flg);
+   DEPRICATED("output_final_current_only");
    PetscOptionsGetReal(PETSC_NULL,   NULL, "-max_distance",    &max_distance,               &flg);
    PetscOptionsGetBool(PETSC_NULL,   NULL, "-nearest_first",   &nearest_first,              &flg);
    PetscOptionsGetBool(PETSC_NULL,   NULL, "-furthest_first",  &furthest_first,             &flg);
@@ -93,12 +103,21 @@ static void parse_args()
    PetscOptionsGetString(PETSC_NULL, NULL, "-converge_at",      convergence, PATH_MAX, &flg);
    PetscOptionsGetEList(PETSC_NULL,  NULL, "-output_format",
                                      output_formats, 3,  &output_format,              &flg); 
+   DEPRICATED("output_format");
+   PetscOptionsGetString(PETSC_NULL,  NULL, "-output_density_filename", output_density_filename, PATH_MAX, &flg);
+   PetscOptionsGetString(PETSC_NULL,  NULL, "-output_sum_density_filename", output_sum_density_filename, PATH_MAX, &flg);
+   PetscOptionsGetString(PETSC_NULL,  NULL, "-output_max_density_filename", output_max_density_filename, PATH_MAX, &flg);
 
-   if(!file_exists(output_directory)) {
-      message("Directory `%s` does not exist. Defaulting to current working directory.\n", output_directory);
-      output_directory[0] = '.';
-      output_directory[1] = 0;
+   // User is using old format
+   if(output_prefix[0]) {
+      if(!output_final_current_only) {
+         sprintf(output_density_filename, "%s/%s{iter:6}.asc", output_directory, output_prefix);
+         message("Setting output_density_filename to `%s`.\n", output_density_filename);
+      }
+      sprintf(output_sum_density_filename, "%s/%sfinal.asc", output_directory, output_prefix);
+      message("Setting output_sum_density_filename to `%s`.\n", output_sum_density_filename);
    }
+
    if(strlen(node_file) > 0 && !file_exists(node_file)) {
       message("%s does not exists\n", node_file);
       MPI_Abort(MPI_COMM_WORLD, 1);
@@ -470,7 +489,11 @@ static void manager()
       MPI_Bcast(nodes, 2, MPI_INT, 0, MPI_COMM_WORLD);
       if(voltages != NULL) {
          /* if we have a previous result, save to file (all but first pass through loop) */
-         pcoeff = write_result(&R, &G, index-1, voltages);
+         pcoeff = write_result(&R, &G,
+                               index-1,
+                               pp->pairs[index-1].p1.index+1,
+                               pp->pairs[index-1].p2.index+1,
+                               voltages);
          if(write_next_total_solution) {
             write_total_current(&R, &G, 1-index);
             write_next_total_solution = PETSC_FALSE;
@@ -501,8 +524,9 @@ static void manager()
    /* send the termination singal to the wokers */
    MPI_Bcast(terminate, 2, MPI_INT, 0, MPI_COMM_WORLD);
    /* write the final result */
-   write_result(&R, &G, nps.seq[i-1], voltages);
-   write_total_current(&R, &G, -1);
+   write_result(&R, &G, nps.seq[i], pp->pairs[nps.seq[i]].p1.index+1,
+                pp->pairs[nps.seq[i]].p2.index+1, voltages);
+   write_total_current(&R, &G, i);
 
    PetscFree(ranges);
    PetscFree(voltages);

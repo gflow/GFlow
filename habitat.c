@@ -190,6 +190,7 @@ void discard_islands(struct ResistanceGrid *R)
          ++current_label;
       }
    }
+
    R->cell_count = 0;
    int nremoved = 0;
    for(i = 0; i < R->nrows; i++) {

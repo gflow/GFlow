@@ -20,6 +20,7 @@
 
 #define streq(X,Y)       (strcmp((X),(Y))==0)
 #define startswith(X,P)  (strncmp((X), (P), strlen(P)) == 0)
+#define endswith(X,S)    (strncmp((X + strlen(X) - strlen(S)), (S), strlen(S)) == 0)
 
 #define likely(x)        __builtin_expect((x),1)
 #define unlikely(x)      __builtin_expect((x),0)

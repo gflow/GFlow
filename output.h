@@ -28,24 +28,23 @@ enum {
    OUTPUT_FORMAT_AMP,
 };
 
-extern char      output_directory[PATH_MAX];
-extern char      output_prefix[PATH_MAX];
-extern int       output_format;
+extern char      output_density_filename[PATH_MAX];
+extern char      output_sum_density_filename[PATH_MAX];
+extern char      output_max_density_filename[PATH_MAX];
 extern double    output_threshold;
 extern char      reff_path[PATH_MAX];
-extern PetscBool output_final_current_only;
 extern PetscBool use_mpiio;
 
 double write_result(struct ResistanceGrid *R,
                     struct ConductanceGrid *G,
-                    int index,
+                    unsigned long iter,
+                    unsigned long src,
+                    unsigned long dest,
                     double *voltages);
 
 void write_total_current(struct ResistanceGrid *R,
                          struct ConductanceGrid *G,
                          int index);
-
-int solution_exists(int index);
 
 void write_effective_resistance(double *voltages, int srcindex,  int srcnode,
                                                   int destindex, int destnode);

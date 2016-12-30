@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <time.h>
 #include <float.h>
 #include <zlib.h>
 #include <petsc.h>
@@ -28,25 +29,25 @@
 #include "output.h"
 #include "util.h"
 
-char      output_directory[PATH_MAX] = ".";
-char      output_prefix[PATH_MAX] = "I";
-int       output_format = OUTPUT_FORMAT_ASC;
+char      output_density_filename[PATH_MAX]     = { 0 };
+char      output_sum_density_filename[PATH_MAX] = { 0 };
+char      output_max_density_filename[PATH_MAX] = { 0 };
 char      reff_path[PATH_MAX] = "";
 double    output_threshold = 1e-9;
-PetscBool output_final_current_only = PETSC_FALSE;
 PetscBool use_mpiio = PETSC_FALSE;
 
 static float *total_current = NULL;
+static float *max_density   = NULL;
 static float *final_current = NULL;
 
 static void write_asc(struct ResistanceGrid *R,
                       struct ConductanceGrid *G,
-                      int index,
+                      const char *filename,
                       float *current,
                       PetscBool compress);
 
 static void write_amp(struct ConductanceGrid *G,
-                      int index,
+                      const char *filename,
                       float *current);
 
 static float *calculate_current(struct ConductanceGrid *G, double *voltages);
@@ -56,9 +57,70 @@ static double sum_sqr(size_t n, float *x, float *w);
 static double rsme(size_t n, float *x, float *w);
 static int    nines(double x);
 
+static void append_value(char **w, const char **r, unsigned long value)
+{
+   // how many character to write?
+   size_t nval = value == 0 ? 1 : floor(log10(value)) + 1;
+
+   // did the user specify a zero-pad?
+   if(**r == ':') {
+      char *endptr;
+      size_t pad = (size_t)strtol(*r + 1, &endptr, 10);
+      *r = endptr;
+      for(int i = nval; i < pad; i++) { **w = '0'; ++(*w); }
+   }
+   if(**r != '}')
+      return;
+   ++(*r);
+
+   // write the number backwards
+   for(int i = nval-1; i >= 0; i--) {
+      (*w)[i] = '0' + (char)(value % 10);
+      value /= 10;
+   }
+   *w += nval;
+}
+
+static void format_filename( char *deststr, const char *fmt
+                           , unsigned long iter  // iteration number
+                           , unsigned long src   // source node id
+                           , unsigned long dest) // destination node id
+{
+   char *w = deststr;    // write pointer
+   const char *r = fmt;  // read pointer
+
+   while(*r) {
+      while(*r && *r != '{') *w++ = *r++;
+      if(!*r) break;
+      ++r;
+      if(strncasecmp(r, "ITER", 4) == 0) {
+         r += 4;
+         append_value(&w, &r, iter);
+      }
+      else if(strncasecmp(r, "SRC", 3) == 0) {
+         r += 3;
+         append_value(&w, &r, src);
+      }
+      else if(strncasecmp(r, "DEST", 4) == 0) {
+         r += 4;
+         append_value(&w, &r, dest);
+      }
+      else if(strncasecmp(r, "TIME", 4) == 0) {
+         r += 4;
+         append_value(&w, &r, time(NULL));
+      }
+      else {
+         *w++ = '{';
+      }
+   }
+   *w = '\0';
+}
+
 double write_result(struct ResistanceGrid *R,
                     struct ConductanceGrid *G,
-                    int index,
+                    unsigned long iter,
+                    unsigned long src,
+                    unsigned long dest,
                     double *voltages)
 {
    float *current, *prev_total;
@@ -67,32 +129,35 @@ double write_result(struct ResistanceGrid *R,
 
    current = calculate_current(G, voltages);
    if(current) {
-      if(!output_final_current_only) {
-         switch(output_format)
-         {
-            case OUTPUT_FORMAT_ASC:
-               write_asc(R, G, index, current, PETSC_FALSE);
-               break;
-            case OUTPUT_FORMAT_ASC_GZ:
-               write_asc(R, G, index, current, PETSC_TRUE);
-               break;
-            case OUTPUT_FORMAT_AMP:
-               write_amp(G, index, current);
-               break;
-         }
+      if(output_density_filename[0]) {
+         char fn[PATH_MAX];
+         format_filename(fn, output_density_filename, iter, src, dest);
+         if(endswith(fn, ".asc"))
+            write_asc(R, G, fn, current, PETSC_FALSE);
+         else if(endswith(fn, ".asc.gz"))
+            write_asc(R, G, fn, current, PETSC_TRUE);
+         else if(endswith(fn, ".amp"))
+            write_amp(G, fn, current);
+         else
+            message("Unknown file format for %s\n", output_density_filename);
       }
       else {
-         message("Solution to iteration %d discarded.\n", index);
+         message("Solution to iteration %lu discarded.\n", iter);
       }
 
       if(total_current == NULL) {
          PetscMalloc(sizeof(float) * G->nrows, &total_current);
          memset(total_current, 0, sizeof(float) * G->nrows);
       }
+      if(max_density == NULL) {
+         PetscMalloc(sizeof(float) * G->nrows, &max_density);
+         memset(max_density, 0, sizeof(float) * G->nrows);
+      }
       prev_total = total_current;
       PetscMalloc(sizeof(float) * G->nrows, &total_current);
       for(i = 0; i < G->nrows; i++) {
          total_current[i] = current[i] + prev_total[i];
+         max_density[i] = MAX(current[i], max_density[i]);
       }
       pcoeff = pearson_coefficient(G->nrows, total_current, prev_total);
       message("convergence-factor = %e (%d-N)\n", pcoeff, nines(pcoeff));
@@ -109,53 +174,39 @@ double write_result(struct ResistanceGrid *R,
 
 void write_total_current(struct ResistanceGrid *R,
                          struct ConductanceGrid *G,
-                         int index)
+                         int iter)
 {
-
-   if(total_current == NULL)
-      return;
-
-   switch(output_format)
-   {
-      case OUTPUT_FORMAT_ASC:
-         write_asc(R, G, index, total_current, PETSC_FALSE);
-         break;
-      case OUTPUT_FORMAT_ASC_GZ:
-         write_asc(R, G, index, total_current, PETSC_TRUE);
-         break;
-      case OUTPUT_FORMAT_AMP:
-         write_amp(G, index, total_current);
-         break;
+   if(output_sum_density_filename[0]) {
+      char fn[PATH_MAX];
+      format_filename(fn, output_sum_density_filename, iter, 0, 0);
+      if(endswith(fn, ".asc"))
+         write_asc(R, G, fn, total_current, PETSC_FALSE);
+      else if(endswith(fn, ".asc.gz"))
+         write_asc(R, G, fn, total_current, PETSC_TRUE);
+      else if(endswith(fn, ".amp"))
+         write_amp(G, fn, total_current);
    }
-   if(index == -1)
-      PetscFree(total_current);
-}
 
-int solution_exists(int index)
-{
-   char name[80];
-   sprintf(name, "%s/%s%06d.", output_directory, output_prefix, index);
-   switch(output_format)
-   {
-      case OUTPUT_FORMAT_ASC:
-         strcat(name, "asc");
-         break;
-      case OUTPUT_FORMAT_ASC_GZ:
-         strcat(name, "asc.gz");
-         break;
-      case OUTPUT_FORMAT_AMP:
-         strcat(name, "amp");
+   if(output_max_density_filename[0]) {
+      char fn[PATH_MAX];
+      format_filename(fn, output_max_density_filename, iter, 0, 0);
+      if(endswith(fn, ".asc"))
+         write_asc(R, G, fn, max_density, PETSC_FALSE);
+      else if(endswith(fn, ".asc.gz"))
+         write_asc(R, G, fn, max_density, PETSC_TRUE);
+      else if(endswith(fn, ".amp"))
+         write_amp(G, fn, max_density);
    }
-   return file_exists(name);
+
+   // PetscFree(total_current);
 }
 
 void write_asc(struct ResistanceGrid *R,
                struct ConductanceGrid *G,
-               int index,
+               const char *filename,
                float *current,
                PetscBool compress)
 {
-   char    fname[80];
    void   *fout;  /* will either be FILE or gzFile */
    int     i, gx, gy;
 
@@ -166,14 +217,7 @@ void write_asc(struct ResistanceGrid *R,
    file_printf_func file_printf;
    file_close_func  file_close;
 
-   if(index == -1)
-      sprintf(fname, "%s/%sfinal.asc", output_directory, output_prefix);
-   else if(index < -1)
-      sprintf(fname, "%s/%ssum_%06d.asc", output_directory, output_prefix, -index);
-   else
-      sprintf(fname, "%s/%s%06d.asc", output_directory, output_prefix, index);
    if(compress) {
-      strcat(fname, ".gz");
       file_open = (file_open_func)gzopen;
       file_printf = (file_printf_func)gzprintf;
       file_close = (file_close_func)gzclose;
@@ -184,7 +228,7 @@ void write_asc(struct ResistanceGrid *R,
       file_close = (file_close_func)fclose;
    }
 
-   fout = file_open(fname, "w");
+   fout = file_open(filename, "w");
    file_printf(fout, "ncols %d\n", R->ncols);
    file_printf(fout, "nrows %d\n", R->nrows);
    file_printf(fout, "xllcorner %lf\n", R->xllcorner);
@@ -219,26 +263,20 @@ void write_asc(struct ResistanceGrid *R,
       gy = 0;
    }
    file_close(fout);
-   message("Result %s written.\n", fname);
+   message("Result %s written.\n", filename);
 }
 
 void write_amp(struct ConductanceGrid *G,
-               int index,
+               const char *filename,
                float *current)
 {
-   char    fname[80];
    gzFile *fout;
 
-   if(index == -1)
-      sprintf(fname, "%s/%sfinal.amp", output_directory, output_prefix);
-   else
-      sprintf(fname, "%s/%s%06d.amp", output_directory, output_prefix, index);
-
-   fout = gzopen(fname, "w");
+   fout = gzopen(filename, "w");
    gzwrite(fout, &G->nrows, sizeof(int));
    gzwrite(fout, current, sizeof(float) * G->nrows);
    gzclose(fout);
-   message("Result %s written.\n", fname);
+   message("Result %s written.\n", filename);
 }
 
 void write_effective_resistance(double *voltages, int srcindex,  int srcnode,
