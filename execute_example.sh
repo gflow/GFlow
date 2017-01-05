@@ -1,7 +1,7 @@
 #!/bin/bash -x
 
 # This script is a documented working example of Gflow with a handful of random pairwise computations (until convergence = 1N) 
-# using 4 cpus on Mac OSX where output is only the current density summation. 
+# using 4 cpus on Mac OSX where the current density summation is the only output. 
 
 # Gflow must be compiled locally before executing this script. Dependencies for GFlow include: openmpi, hypre, and petsc. 
 # If you would like to execute a random shuffle of all pairwise, please install 'coreutils'as well.
@@ -27,11 +27,8 @@ SECONDS=0
 date
 
 # REQUIRED flags to execute GFlow are below. Please read descriptions or see example arguments for use. 
-#	Set Number of processes (CPUs) and call Gflow. Currently -n = 4 below
 
-	# -output_sum_density_filename
-		# Set Output Path, file name, and format of cumulative current density.
-		# For use see: https://github.com/Pbleonard/GFlow/issues/8
+	# Set Number of processes (CPUs) and call Gflow.x  - Currently -n = 4 below
 	# -ouput_prefix  (DEPRICATED)
 		# Set Prefix for output files: Currently = 'local_'
 	# -ouput_directory (DEPRICATED)
@@ -48,6 +45,10 @@ date
 
 # OPTIONAL flags
 
+	# -output_sum_density_filename
+		# Set Output Path, file name, and format of cumulative current density. Omitting this flag will discard current density
+		# summation.
+		# For use see: https://github.com/Pbleonard/GFlow/issues/8
 	# -output_density_filename
 		# Set Output Path, file name prefix, and format (i.e., *.asc, *.asc.gz) of pairwise calculations. Omitting this flag will 
 		# discard each pairwise solve output and assume you want the cumulative output only.
@@ -70,7 +71,7 @@ mpiexec -n 4 ./gflow.x \
 	-converge_at 1N \
 	-shuffle_node_pairs 1 \
 	-effective_resistance ./R_eff.csv \
-	-output_sum_density_filename "./{time}_local_sum_{iter}.asc" \
+	-output_sum_density_filename ./{time}_local_sum_{iter}.asc \
  
 
 : "walltime: $SECONDS seconds"
