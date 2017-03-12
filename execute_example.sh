@@ -1,7 +1,7 @@
 #!/bin/bash -x
 
 # This script is a documented working example of Gflow with a handful of random pairwise computations (until convergence = 1N) 
-# using 4 cpus on Mac OSX where output is only the current density summation. 
+# using 4 cpus on Mac OSX where the current density summation is the only output. 
 
 # Gflow must be compiled locally before executing this script. Dependencies for GFlow include: openmpi, hypre, and petsc. 
 # If you would like to execute a random shuffle of all pairwise, please install 'coreutils'as well.
@@ -26,25 +26,33 @@ OUTPUT_DIR=.
 SECONDS=0
 date
 
-# REQUIRED flags to execute GFlow are below. Please read descriptions or see example arguments for use.
+# REQUIRED flags to execute GFlow are below. Please read descriptions or see example arguments for use. 
 
-#	Set Number of processes (CPUs) and call Gflow. Currently -n = 4 below
-	# -ouput_prefix
+	# Set Number of processes (CPUs) and call Gflow.x  - Currently -n = 4 below
+	# -ouput_prefix  (DEPRICATED)
 		# Set Prefix for output files: Currently = 'local_'
-	# -ouput_directory
+	# -ouput_directory (DEPRICATED)
 		# Set Output Directory: Set to default above
 	# -habitat
 		# Set Habitat Map or resistance surface (.asc)
 	# -nodes
 		# Set Focal Nodes or Source/Destination Points (.txt list of point pairs to calculate or .asc grid). Inputs must be points.
 		# If using a .txt list, the point coorindates must be relative to the resistance surface grid. Please look at example inputs.
-	# -output_format
+	# -output_format (DEPRICATED)
 		# Set Desired Output formaat --'asc' or 'amps' -- Default = asc
-	# -output_final_current_only
+	# -output_final_current_only (DEPRICATED)
 		# Select output options. 1 = Only summation; 0 = Pairwise calculations + Summation
 
 # OPTIONAL flags
 
+	# -output_sum_density_filename
+		# Set Output Path, file name, and format of cumulative current density. Omitting this flag will discard current density
+		# summation.
+		# For use see: https://github.com/Pbleonard/GFlow/issues/8
+	# -output_density_filename
+		# Set Output Path, file name prefix, and format (i.e., *.asc, *.asc.gz) of pairwise calculations. Omitting this flag will 
+		# discard each pairwise solve output and assume you want the cumulative output only.
+		# For use see: https://github.com/Pbleonard/GFlow/issues/8
 	# -node_pairs 
 		# Calculate only desired node pairs if input (e.g., '${OUTPUT_DIR}/shuf.tsv \' from gshuf above). Currently not used.
 	# -converge_at
@@ -58,15 +66,12 @@ date
 # Assigning Arguments to Flags for Execution:
 
 mpiexec -n 4 ./gflow.x \
-	-output_prefix local_ \
-	-output_directory ${OUTPUT_DIR} \
 	-habitat resistance.asc \
 	-nodes nodes \
 	-converge_at 1N \
 	-shuffle_node_pairs 1 \
-	-effective_resistance ${OUTPUT_DIR}/R_eff.csv \
-	-output_format asc \
-	-output_final_current_only 1
+	-effective_resistance ./R_eff.csv \
+	-output_sum_density_filename ./{time}_local_sum_{iter}.asc \
  
 
 : "walltime: $SECONDS seconds"
