@@ -182,6 +182,12 @@ static void init_node_pair_sequence(struct NodePairSequence *nps, struct PointPa
    PetscMalloc(sizeof(int) * nps->count, &nps->seq);
    PetscOptionsGetIntArray(PETSC_NULL, NULL, "-range", nps->seq, &nps->count, &flg);
    if(!flg) {
+      if(nps->count < pp->count) {
+         PetscFree(nps->seq);
+         nps->count = pp->count;
+         PetscMalloc(sizeof(int) * nps->count, &nps->seq);
+      }
+
       nps->count = pp->count;
       for(i = 0; i < nps->count; i++)
          nps->seq[i] = i;
