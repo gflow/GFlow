@@ -6,7 +6,7 @@ Software for modeling circuit theory-based connectivity at any scale. We develop
 
 ## Installation
 
-### [Please download latest release with sample data.] (https://github.com/Pbleonard/GFlow/releases/latest)
+### [Please download latest release with sample data.](https://github.com/Pbleonard/GFlow/releases/latest)
 
 ### Mac OS X Install Instructions
 The easiest way to setup your environment is with the
@@ -36,7 +36,7 @@ directory.
 
 
 ### Linux Install Instructions
-While users are free to build GFlow dependcies themselves, we find a package manager is suitable for many users and the easiest way to get started. For example on Ubuntu based systems you can use the default package management tool called [apt] (https://help.ubuntu.com/lts/serverguide/apt.html) or optionally install and use [Aptitude] (https://help.ubuntu.com/lts/serverguide/aptitude.html) 
+While users are free to build GFlow dependcies themselves, we find a package manager is suitable for many users and the easiest way to get started. For example on Ubuntu based systems you can use the default package management tool called [apt](https://help.ubuntu.com/lts/serverguide/apt.html) or optionally install and use [Aptitude](https://help.ubuntu.com/lts/serverguide/aptitude.html) 
 
 
 To Install Aptitude, run the following command in terminal:
