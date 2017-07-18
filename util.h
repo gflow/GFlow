@@ -18,7 +18,7 @@
 #ifndef UTIL_H 
 #define UTIL_H 
 
-#define streq(X,Y)       (strcmp((X),(Y))==0)
+#define streq(X,Y)       (strcasecmp((X),(Y))==0)
 #define startswith(X,P)  (strncmp((X), (P), strlen(P)) == 0)
 #define endswith(X,S)    (strncmp((X + strlen(X) - strlen(S)), (S), strlen(S)) == 0)
 
