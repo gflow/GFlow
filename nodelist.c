@@ -80,6 +80,16 @@ int validate_points(struct Point *points, size_t npoints, struct ResistanceGrid 
    size_t i;
    int result = 1;
    for(i = 0; i < npoints; i++) {
+      if(points[i].x <= 0) {
+         fprintf(stderr, "Point #%zu (%ld,%ld) is out of range. (%ld <= 0)\n",
+                         i+1, points[i].x, points[i].y, points[i].x);
+         result = 0;
+      }
+      if(points[i].y <= 0) {
+         fprintf(stderr, "Point #%zu (%ld,%ld) is out of range. (%ld <= 0)\n",
+                         i+1, points[i].x, points[i].y, points[i].y);
+         result = 0;
+      }
       if(points[i].x >= R->nrows) {
          fprintf(stderr, "Point #%zu (%ld,%ld) is out of range. (%ld >= %d)\n",
                          i+1, points[i].x, points[i].y, points[i].x, R->nrows);
