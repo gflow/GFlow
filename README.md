@@ -1,4 +1,5 @@
-# GFlow
+[![](https://user-images.githubusercontent.com/19536460/28901409-556b2a1a-77a4-11e7-8bf7-bc35ab8de6d7.png)
+
 [![DOI](https://zenodo.org/badge/23503/Pbleonard/GFlow.svg)](https://zenodo.org/badge/latestdoi/23503/Pbleonard/GFlow)
 [![License (GPL version 3)](https://img.shields.io/badge/license-GNU%20GPL%20version%203-red.svg?style=flat-square)](http://opensource.org/licenses/GPL-3.0)
 
