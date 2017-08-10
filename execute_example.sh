@@ -18,6 +18,10 @@ export LD_LIBRARY_PATH=${PETSC_DIR}/lib:$LD_LIBRARY_PATH
 # Set Output Directory: Default is Current Directory
 OUTPUT_DIR=.
 
+# gflow will not automatically create the output directory.  Ensure the directory exists, otherwise the program will crash.
+[[ -d ${OUTPUT_DIR} ]] || mkdir -p ${OUTPUT_DIR}
+
+
 # DEBUG: Set number of random pairs to calculate from all possible pairs (Currently -n=5). Must be used with -node_pairs flag
 # Allows exact number of test pairs. Remove or comment line for all pairwise. Requires 'coreutils' and 'all.tsv' from inputs.
 	# gshuf all.tsv -n 5 > ${OUTPUT_DIR}/shuf.tsv 
