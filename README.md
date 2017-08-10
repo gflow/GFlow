@@ -31,7 +31,9 @@ With the required packages installed, `gflow` can be built inside its containing
      make
      
 If you encounter errors related to PETSc, you may have to edit the `Makefile` to change the 
-value of the `PETSC_DIR` variable.
+value of the `PETSC_DIR` variable. For example, during the above proceedure, homebrew installed petsc here:
+
+	/usr/local/Cellar/petsc/3.7.3/real
 
 Currently, there is no mechanism to automatically copy the `gflow.x` binary to a centrally-located
 directory.
