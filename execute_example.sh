@@ -40,11 +40,12 @@ date
 
 	# -output_density_filename
 		# Set Output Path, file name, and format (i.e., *.asc, *.asc.gz) of individual pairwise calculations. Omitting this 
-		# flag will discard each pairwise solve output and assume you want the cumulative output only. Currently omitted below.
+		# flag will discard each pairwise solve output and assume you want the cumulative output only. Currently omitted below. Do 
+		# not use spaces in the filepath.
 		# For use see: https://github.com/gflow/GFlow/issues/8
 	# -output_sum_density_filename
 		# Set Output Path, file name prefix, and format (i.e., *.asc, *.asc.gz) of final summed calculation. If omitted, the final 
-		# summed current density will be discarded.
+		# summed current density will be discarded. Do not use spaces in the filepath.
 		# For use see: https://github.com/Pbleonard/GFlow/issues/8
 	# -node_pairs 
 		# Calculate only desired node pairs if input. Currently not used. Listed pairs should be referenced by their ID, not their
