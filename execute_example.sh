@@ -50,6 +50,8 @@ date
 	# -node_pairs 
 		# Calculate only desired node pairs if input. Currently not used. Listed pairs should be referenced by their ID, not their
 		# coordinates.
+	# -max_distance
+		# Only calculate pairs within a given euclidean distance. Units should correspond to input grids (typically meters)
 	# -converge_at
 		# Set Convergence Factor to stop calculating. Typically used in place of 'node_pairs' or if all pairwise is too
 		# computationally time consuming. Acceptable formats include: '4N' or '.9999'. Set to '1N' Below. If omitted, gflow will
@@ -58,6 +60,7 @@ date
 		# Shuffles pairs for random selection. Input is binary. Currently set to shuffle below (= 1)
 	# -effective_resistance
 		# Print effective resistance to log file. Supply path for .csv
+
 
 # Assigning Arguments to Flags for Execution:
 
